@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Getting Started | Mass Spawner Documentation</title>
+        <meta charset="utf-8">
+        <meta name="description" content="Mass Spawner Documentation">
+        <meta name="author" content="Alex Kovács">
+        <link rel="stylesheet" href="Assets/docs_style.css">
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <h1 class="main-title">Getting Started</h1>
+            <div class="menu">
+                <a href="Documentation.html" class="current">Getting Started</a>
+                <a href="Pages/Heightmap.html">Heightmap generation</a>
+                <a href="Pages/Layers.html">Spawn layers</a>
+                <a href="Pages/ColorGroups.html">Color groups</a>
+                <a href="https://lxkvcs.hu" target="_blank">@Website</a>
+                <a href="mailto:kovacsalex95@gmail.com" target="_blank">@Support</a>
+            </div>
+            <div class="message">Thank you for purchasing this product. I hope it will live up to its promise.</div>
+            <div class="page">
+                <h2>Getting started video</h2>
+                <div>
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/Aq82qPoJINc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="page">
+                <h2>Editor Panel</h2>
+                <div>
+                    <strong>We just opened the MassSpawner editor, so we can work with it.</strong>
+                    </br>
+                    But before that, we need to understand what we seeing:
+                    <div class="col-wrapper" style="margin-top: 10px;">
+                        <div class="col col-3-1">
+                            <img src="Images/0_start.png" alt="starting screen" />
+                        </div>
+                        <div class="col col-3-2">
+                            <ul>
+                                <li>
+                                    <strong>Heightmap view</strong>: Here you can see the selected area's height and steepness graph, or a stylized 3D view.
+                                    Currently this is empty because <strong>we dont have heightmap yet</strong>.
+                                    <br />After you create a heightmap, this panel gonna look like this:
+                                    </br><img src="Images/1_main_view.png" alt="main view" />
+                                </li>
+                                <li style="margin-top: 20px;"><strong>#1</strong>: Here you can switch from the 3 modes:</li>
+                                <ul>
+                                    <li>Heightmap</li>
+                                    <li>Steepness graph</li>
+                                    <li>Stylized view</li>
+                                </ul>
+                                <div class="three-image">
+                                    <img src="Images/2_1_heightmap.png" alt="heightmap" />
+                                    <img src="Images/2_2_slopemap.png" alt="slopemap" />
+                                    <img src="Images/2_3_stylized.png" alt="stylized 3d" />
+                                </div>
+                                <li style="margin-top: 20px;"><strong>#2</strong>: Here you can select a configuration page (<strong>#3</strong>):</li>
+                                <ul>
+                                    <li>
+                                        <strong>World & Heightmap</strong>: Here you can define your world's boundary, and from wich layers you want to sample the height data, and wich layer you want to ignore. You can change the heightmap resolution as well. <a href="Pages/Heightmap.html">More information</a>
+                                        </br><img src="Images/3_1_world.png" alt="world & heightmap" />
+                                    </li>
+                                    <li>
+                                        <strong>Layers</strong>: Here you can define the layers and their rules. This defines wich prefab gonna be spawned, where, and how. <a href="Pages/Layers.html">More information</a>
+                                        </br><img src="Images/3_3_layers.png" alt="layers" />
+                                    </li>
+                                    <li>
+                                        <strong>Color groups</strong>: Here you can define coloring groups. You can assign this groups to a layer's prefab. <a href="Pages/ColorGroups.html">More information</a>
+                                        </br><img src="Images/3_4_colorgroups.png" alt="color groups" />
+                                    </li>
+                                </ul>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <label class="credits">MassSpawner | Created by <a href="https://lxkvcs.hu">Alex Kovács</a></label>
+    </body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Color groups | Mass Spawner Documentation</title>
+        <meta charset="utf-8">
+        <meta name="description" content="Mass Spawner Documentation">
+        <meta name="author" content="Alex Kovács">
+        <link rel="stylesheet" href="../Assets/docs_style.css">
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <h1 class="main-title">Color groups</h1>
+            <div class="menu">
+                <a href="../Documentation.html">Getting Started</a>
+                <a href="Heightmap.html">Heightmap generation</a>
+                <a href="Layers.html">Spawn layers</a>
+                <a href="ColorGroups.html" class="current">Color groups</a>
+                <a href="https://lxkvcs.hu" target="_blank">@Website</a>
+                <a href="mailto:kovacsalex95@gmail.com" target="_blank">@Support</a>
+            </div>
+            <div class="page">
+                <h2>Operating principle</h2>
+                <div>
+                    <ul>
+                        <li>You can add multiple <i>Color group</i></li>
+                        <li>You can specify a color range for a group using RGB, HSV, Lerp, or Gradients</li>
+                        <li>If a color group has been assigned to a layer object, the color is applied after placement. <a href="Layers.html#colorgroups">More info</a></li>
+                        <li>You can see preview colors in the bottom right corner if you move your mouse around.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="page">
+                <h2>Group mixing modes</h2>
+                <div>
+                    You can choose from 4 options:
+                    <ul>
+                        <li>
+                            <strong>RGB</strong>: You can specify Red, Green, and Blue values within 0-255. You can choose from Fixed, Random, or Copy X/Y/Z like in the object layer's <a href="Layers.html#transform">transformation settings</a>.
+                            <img src="../Images/5_1_colorgroup_rgb.png" alt="rgb mixing" />
+                        </li>
+                        <li><strong>HSV</strong>: You can specify Hue, Saturation, and Value values within 0-255. Otherwise this is the same as <i>RGB Mode</i></li>
+                        <li>
+                            <strong>Lerp</strong>: You can specify two separate colors, and the system gonna get a value between the two randomly
+                            <img src="../Images/5_2_colorgroup_lerp.png" alt="lerp mixing" />
+                        </li>
+                        <li>
+                            <strong>Gradient</strong>: You can specify a color gradient, and the system gonna get a color from it randomly
+                            <img src="../Images/5_3_colorgroup_gradient.png" alt="gradient mixing" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <label class="credits">MassSpawner | Created by <a href="https://lxkvcs.hu">Alex Kovács</a></label>
+    </body>
+</html>

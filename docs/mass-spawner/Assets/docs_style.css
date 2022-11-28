@@ -1,0 +1,136 @@
+* {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    font-family: Roboto, Arial, Tahoma, Open sans-serif;
+    font-size: 17px;
+    line-height: 1.2em;
+}
+
+body {
+    background: white;
+    color: black;
+}
+div#wrapper {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 50px 0;
+}
+
+.message {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #eee;
+}
+
+.menu {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #eee;
+}
+.menu > a {
+    border: 0;
+    margin-right: 10px;
+    padding-right: 10px;
+    border-right: 1px solid #444;
+    margin-bottom: 10px;
+}
+.menu > a.current {
+    color: black;
+    cursor: default;
+}
+.menu > a:after {content: '';}
+.menu > a:last-child {
+    margin-right: 0;
+    padding-right: 0;
+    border-right: 0;
+}
+
+.page {
+    padding: 20px;
+    background: #eee;
+    margin-bottom: 20px;
+}
+
+i {
+    font-style: normal;
+    font-weight: bold;
+    color: #8c1f8e;
+}
+
+a {
+    color: #0089ff;
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 1px solid #0089ff;
+}
+a:after {content: ' →';}
+
+h1 {
+    margin: 10px 0;
+    font-size: 2em;
+}
+h2 {
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+ul {
+    padding-left: 20px;
+    line-height: 1.1em;
+}
+
+ul:not(.sub) {
+    margin-top: 10px;
+}
+
+img {
+    max-height: 400px;
+    max-width: calc(100% - 20px);
+    display: block;
+    width: auto;
+    height: auto;
+    margin: 10px;
+}
+
+.three-image {
+    font-size: 0;
+    margin: 10px 0;
+}
+.three-image > img {
+    max-height: initial;
+    display: inline-block;
+    width: calc( (100% - 20px) / 3);
+    margin: 0;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.three-image > img:nth-child(3n+3) {
+    margin-right: 0;
+}
+
+.col-wrapper {
+    font-size: 0;
+}
+.col {
+    font-size: initial;
+    display: inline-block;
+    vertical-align: top;
+}
+.col > img {
+    max-width: calc(100% - 10px);
+}
+.col.col-3-1 {
+    width: calc( ( 100% - 10px) / 3);
+    margin-right: 10px;
+}
+.col.col-3-2 {
+    width: calc( ( 100% - 10px) / 3 * 2);
+}
+
+label.credits {
+    display: block;
+    text-align: center;
+    margin-bottom: 50px;
+}

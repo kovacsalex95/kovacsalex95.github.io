@@ -1,0 +1,145 @@
+<html>
+    <head>
+        <title>TrackpadPro Documentation</title>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="introduction">
+                <h1>TrackpadPro - Advanced SceneView controls</h1>
+                <p>Thank you for using my asset, I hope it will live up to its promise!</p>
+            </div>
+            <div class="setup">
+                <h2>Getting started</h2>
+                <p>In order to use TrackpadPro we need to do a few basic steps:</p>
+                <ul>
+                    <li>Import the asset into your project</li>
+                    <li>Close the Scene View tab if opened</li>
+                    <li>Go to <strong>View menu</strong> and select <strong>Scene View (TPP)</strong></li>
+                    <li>Adjust your layout to meet your requirements</li>
+                    <li><i>(Optional)</i> Save your editor layout</li>
+                </ul>
+            </div>
+            <div class="basics">
+                <h2>Basic usage</h2>
+                <p>If you happy with the blender default controls then you pretty much done!</p>
+                <p>You can use the following bindings by default:</p>
+                <ul>
+                    <li><strong>Scroll (two finger move):</strong> Rotate the view around the pivot point</li>
+                    <li><strong>Shift + Scroll:</strong> Pan the view (moves the pivot point)</li>
+                    <li><strong>Command + Scoll:</strong> Zooms in and out</li>
+                </ul>
+            </div>
+            <div class="advanced">
+                <h2>Advanced bindings and settings</h2>
+                <div class="settings-button">
+                    <p>If you using a mouse or you want to specify a custom binding you can press the settings button:</p>
+                    <img src="Images/settings_button.png" alt="Settings button" title="Settings button" />
+                </div>
+                <p>After you clicked you should see the following settings panel:</p>
+                <div class="settings-panel">
+                    <img src="Images/settings_panel.png" alt="Settings panel" title="Settings panel" />
+                    <div class="content">
+                        <h3>1 - Cursor speed:</h3>
+                        <ul>
+                            <li><strong>Global cursor speed</strong>: This is the global mouse speed for every action</li>
+                            <li><strong>Cursor speed multiplier</strong>: The speed of the mouse movement compared to scroll movement</li>
+                        </ul>
+                        <h3>2 - Rotate view:</h3>
+                        <ul>
+                            <li><strong>After the text "ROTATE" you see the current binding</strong></li>
+                            <li>Below that you can specify wich button needed to perform the action</li>
+                            <li>Below the action keys you can specify the mouse events (Which mouse button needed, which axis used). <strong>You can invert axes here!</strong></li>
+                            <li><strong>Rotate speed</strong>: The speed of rotation around the pivot</li>
+                        </ul>
+                        <h3>3 - Pan view:</h3>
+                        <ul>
+                            <li><strong>After the text "PAN" you see the current binding</strong></li>
+                            <li>Below that you can specify wich button needed to perform the action</li>
+                            <li>Below the action keys you can specify the mouse events (Which mouse button needed, which axis used). <strong>You can invert axes here!</strong></li>
+                            <li><strong>Pan speed</strong>: The speed of pan movement</li>
+                        </ul>
+                        <h3>4 - Zoom view:</h3>
+                        <ul>
+                            <li><strong>After the text "ZOOM" you see the current binding</strong></li>
+                            <li>Below that you can specify wich button needed to perform the action</li>
+                            <li>Below the action keys you can specify the mouse events (Which mouse button needed, which axis used). <strong>You can invert axes here!</strong></li>
+                            <li><strong>Zoom speed</strong>: The speed of zoom movement</li>
+                            <li><strong>Zoom min</strong>: The minimum amount of zoom</li>
+                            <li><strong>Zoom max</strong>: The maximum amount of zoom</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="contact">
+                <h2>Support & Contact</h2>
+                <p>If you have any problems/questions feel free to email me:</p>
+                <p>Alex Kovács - <a href="mailto:kovacsalex95@gmail.com">kovacsalex95@gmail.com</a></p>
+            </div>
+        </div>
+        <style>
+            html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0;overflow:visible}pre{font-family:monospace,monospace;font-size:1em}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}code,kbd,samp{font-family:monospace,monospace;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{box-sizing:border-box;color:inherit;display:table;max-width:100%;padding:0;white-space:normal}progress{vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio]{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}details{display:block}summary{display:list-item}template{display:none}[hidden]{display:none}
+
+            body {
+                font-family: sans-serif;
+                font-size: 16px;
+                background: #eee;
+            }
+
+            .wrapper {
+                background: #f9f9f9;
+                width: min(100%, 1000px);
+                margin: 2 auto;
+                padding: 3rem;
+                display: flex;
+                flex-direction: column;
+                row-gap: 2rem;
+            }
+
+            .settings-button {
+                display: flex;
+                flex-direction: row;
+                column-gap: 2rem;
+                align-items: start;
+            }
+
+            .settings-button > img {
+                width: 20%;
+                height: auto;
+            }
+
+            .settings-button > p {
+                width: 100%;
+                text-align: left;
+            }
+
+            .settings-panel {
+                display: flex;
+                flex-direction: row-reverse;
+                column-gap: 2rem;
+                align-items: start;
+            }
+
+            .settings-panel > img {
+                width: 20%;
+                height: auto;
+            }
+
+            .settings-panel > .content {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                row-gap: 2rem;
+            }
+
+            .settings-panel > .content > * {
+                margin: 0;
+            }
+
+            .advanced > p {
+                text-align: left;
+                margin: 3rem 0;
+                font-weight: bold;
+            }
+        </style>
+    </body>
+</html>
