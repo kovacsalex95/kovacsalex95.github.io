@@ -3,50 +3,11 @@
     <head>
         <meta charset="UTF-8">
         <title>Wormhole</title>
+        <link rel="stylesheet" href="assets/css/main.css">
+        <script type="text/javascript" src="assets/js/wormhole.js"></script>
     </head>
 
     <body>
-        <d-link href="assets/css/main.css"></d-link>
-        <d-script src="assets/js/wormhole.js"></d-script>
-        <script id="init-resources">
-            initResources();
-
-            function initResources()
-            {
-                const productionUrl = 'https://lxkvcs.hu';
-                const isOnProduction = window.location.href.substring(0, productionUrl.length) === productionUrl;
-                const resourceUrlPrefix = isOnProduction ? `${productionUrl}/` : '';
-
-                const scripts = document.body.querySelectorAll('d-script[src]');
-                const stylesheets = document.body.querySelectorAll('d-link[href]');
-
-                scripts.forEach(script => {
-                    const src = script.getAttribute('src');
-
-                    const scriptTag = document.createElement('script');
-                    scriptTag.type = 'text/javascript';
-                    scriptTag.src = resourceUrlPrefix + src;
-
-                    document.body.appendChild(scriptTag);
-
-                    script.remove();
-                });
-
-                stylesheets.forEach(stylesheet => {
-                    const src = stylesheet.getAttribute('href');
-
-                    const styleTag = document.createElement('link');
-                    styleTag.rel = 'stylesheet';
-                    styleTag.href = resourceUrlPrefix + src;
-
-                    document.body.appendChild(styleTag);
-
-                    stylesheet.remove();
-                });
-                
-                setTimeout(() => document.getElementById('init-resources').remove(), 100);
-            }
-        </script>
         <canvas id="wormhole"></canvas>
     </body>
 </html>
