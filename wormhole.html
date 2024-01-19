@@ -8,7 +8,7 @@
     <body>
         <d-link href="assets/css/main.css"></d-link>
         <d-script src="assets/js/wormhole.js"></d-script>
-        <script>
+        <script id="init-resources">
             initResources();
 
             function initResources()
@@ -43,6 +43,8 @@
 
                     stylesheet.remove();
                 });
+                
+                setTimeout(() => document.getElementById('init-resources').remove(), 100);
             }
         </script>
         <canvas id="wormhole"></canvas>
