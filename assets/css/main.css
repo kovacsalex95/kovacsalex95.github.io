@@ -1,0 +1,16 @@
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #C6DAE4;
+    min-height: 100vh;
+}
+
+canvas#wormhole {
+    width: 100%;
+    height: 100%;
+}
