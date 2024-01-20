@@ -297,9 +297,9 @@ class WormholeEntity
         if (Math.min(this.rectangleWidth, this.rectangleHeight) > 10) {
             let colorT = Wormhole.lerp(this.progress, Math.sqrt(this.progress), 0.25);
 
-            this.backgroundR = Math.round(Wormhole.lerp(30, 210, colorT));
-            this.backgroundG = Math.round(Wormhole.lerp(60, 210, colorT));
-            this.backgroundB = Math.round(Wormhole.lerp(90, 210, colorT));
+            this.backgroundR = Math.round(Wormhole.lerp(10, 210, colorT) * 10000) / 10000;
+            this.backgroundG = Math.round(Wormhole.lerp(40, 210, colorT) * 10000) / 10000;
+            this.backgroundB = Math.round(Wormhole.lerp(70, 210, colorT) * 10000) / 10000;
 
             this.wormhole.canvas.fillStyle = `rgb(${this.backgroundR}, ${this.backgroundG}, ${this.backgroundB})`;
             this.wormhole.fillCenteredRect(0, 0, this.scaledRectangleWidth, this.scaledRectangleHeight);
