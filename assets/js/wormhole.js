@@ -10,7 +10,7 @@ class Wormhole
     static get RESOLUTION_SCALE() { return this.CANVAS_WIDTH / this.CANVAS_MAX_WIDTH; }
     static get CANVAS_WIDTH() { return Math.min(Wormhole.CANVAS_TARGET_WIDTH, Wormhole.CANVAS_MAX_WIDTH); }
     static get CANVAS_HEIGHT() { return Math.min(Wormhole.CANVAS_TARGET_HEIGHT, Wormhole.CANVAS_MAX_HEIGHT); }
-    static get ENTITY_PRECISION() { return 2000; }
+    static get ENTITY_PRECISION() { return 2550; }
     static get ENTITY_COUNT() { return 50; }
     static get ENTITY_SPEED() { return -0.25; }
     static get SHOCKWAVE_SIZE_MULTIPLIER() { return 0.75; }
@@ -134,10 +134,10 @@ class Wormhole
         );
     }
 
-    static lerp(a, b, t, clamp = true)
+    static lerp(a, b, t, clamp = true, precision = 1)
     {
         let diff = b - a;
-        let tt = clamp ? Math.max(0, Math.min(1, t)) : t;
+        let tt = (clamp ? Math.max(0, Math.min(precision, t)) : t) / precision;
         return a + diff * tt;
     }
 
@@ -149,17 +149,24 @@ class Wormhole
         return clamp ? Math.max(0, Math.min(1, ratio)) : ratio;
     }
 
-    static rotateClamp(value, min = 0, max = 1)
+    static rotateClamp(value, min = 0, max = 1, onClamp = null)
     {
         let result = value;
         let diff = Math.abs(max - min);
+        let clamped = false;
 
         while (result < min) {
             result += diff;
+            clamped = true;
         }
 
         while (result > max) {
             result -= diff;
+            clamped = true;
+        }
+
+        if (clamped && onClamp !== null && onClamp instanceof Function) {
+            onClamp();
         }
 
         return result;
@@ -236,9 +243,12 @@ class WormholeEntity
         this.flairs = [];
         this.sizeMultiplier = 1;
 
-        this.backgroundR = 0;
-        this.backgroundG = 0;
-        this.backgroundB = 0;
+        this.targetBackgroundR = 0;
+        this.targetBackgroundG = 0;
+        this.targetBackgroundB = 0;
+        this.backgroundR = -1;
+        this.backgroundG = -1;
+        this.backgroundB = -1;
 
         this.tick();
         this.generateFlairs();
@@ -263,7 +273,11 @@ class WormholeEntity
     tick()
     {
         this.virtualProgress += this.wormhole.entitySpeed;
-        this.virtualProgress = Wormhole.rotateClamp(this.virtualProgress, 0, Wormhole.ENTITY_PRECISION);
+        this.virtualProgress = Wormhole.rotateClamp(this.virtualProgress, 0, Wormhole.ENTITY_PRECISION, () => {
+            this.backgroundR = this.targetBackgroundR;
+            this.backgroundG = this.targetBackgroundG;
+            this.backgroundB = this.targetBackgroundB;
+        });
 
         this.progress = Math.round(this.virtualProgress) / Wormhole.ENTITY_PRECISION;
     }
@@ -306,13 +320,20 @@ class WormholeEntity
         this.update();
 
         if (Math.min(this.rectangleWidth, this.rectangleHeight) > 10) {
-            let colorT = this.progress;
+            this.targetBackgroundR = Math.round(Wormhole.lerp(10, 210, this.progress)); //, Wormhole.ENTITY_PRECISION));
+            this.targetBackgroundG = Math.round(Wormhole.lerp(40, 210, this.progress)); //, Wormhole.ENTITY_PRECISION));
+            this.targetBackgroundB = Math.round(Wormhole.lerp(70, 210, this.progress)); //, Wormhole.ENTITY_PRECISION));
 
-            this.backgroundR = Math.round(Wormhole.lerp(10, 210, colorT));
-            this.backgroundG = Math.round(Wormhole.lerp(40, 210, colorT));
-            this.backgroundB = Math.round(Wormhole.lerp(70, 210, colorT));
+            if (this.backgroundR < 0 || this.backgroundG < 0|| this.backgroundB < 0) {
+                this.backgroundR = this.targetBackgroundR;
+                this.backgroundG = this.targetBackgroundG;
+                this.backgroundB = this.targetBackgroundB;
+            }
+            this.backgroundR = Wormhole.lerp(this.backgroundR, this.targetBackgroundR, 0.001);
+            this.backgroundG = Wormhole.lerp(this.backgroundG, this.targetBackgroundG, 0.001);
+            this.backgroundB = Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.001);
 
-            this.wormhole.canvas.fillStyle = `rgb(${this.backgroundR}, ${this.backgroundG}, ${this.backgroundB})`;
+            this.wormhole.canvas.fillStyle = `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`;
             this.wormhole.fillCenteredRect(0, 0, this.scaledRectangleWidth, this.scaledRectangleHeight);
         }
 
