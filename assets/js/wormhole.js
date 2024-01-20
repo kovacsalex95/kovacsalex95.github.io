@@ -55,7 +55,7 @@ class Wormhole
 
         this.entityColors = this.generateColorRamp(
             Wormhole.hexToRgb('#9cbac9'),
-            Wormhole.hexToRgb('#184054'),
+            Wormhole.hexToRgb('#243e49'),
             Wormhole.ENTITY_COUNT * Wormhole.ENTITY_COLOR_PRECISION,
             (x) => x * 1.2,
         )
