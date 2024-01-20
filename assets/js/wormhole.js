@@ -274,9 +274,9 @@ class WormholeEntity
     {
         this.virtualProgress += this.wormhole.entitySpeed;
         this.virtualProgress = Wormhole.rotateClamp(this.virtualProgress, 0, Wormhole.ENTITY_PRECISION, () => {
-            this.backgroundR = this.targetBackgroundR;
-            this.backgroundG = this.targetBackgroundG;
-            this.backgroundB = this.targetBackgroundB;
+            this.backgroundR = -1;
+            this.backgroundG = -1;
+            this.backgroundB = -1;
         });
 
         this.progress = Math.round(this.virtualProgress) / Wormhole.ENTITY_PRECISION;
@@ -329,9 +329,9 @@ class WormholeEntity
                 this.backgroundG = this.targetBackgroundG;
                 this.backgroundB = this.targetBackgroundB;
             }
-            this.backgroundR = Wormhole.lerp(this.backgroundR, this.targetBackgroundR, 0.001);
-            this.backgroundG = Wormhole.lerp(this.backgroundG, this.targetBackgroundG, 0.001);
-            this.backgroundB = Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.001);
+            this.backgroundR = Wormhole.lerp(this.backgroundR, this.targetBackgroundR, 0.01 * this.wormhole.framerateSpeed);
+            this.backgroundG = Wormhole.lerp(this.backgroundG, this.targetBackgroundG, 0.01 * this.wormhole.framerateSpeed);
+            this.backgroundB = Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.01 * this.wormhole.framerateSpeed);
 
             this.wormhole.canvas.fillStyle = `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`;
             this.wormhole.fillCenteredRect(0, 0, this.scaledRectangleWidth, this.scaledRectangleHeight);
