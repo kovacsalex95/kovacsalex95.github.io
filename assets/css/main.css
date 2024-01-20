@@ -59,7 +59,7 @@ header#main-header > #content > nav.main {
     padding: var(--gap-2) var(--gap-3);
     margin-left: auto;
     border-radius: 0.5rem;
-    backdrop-filter: blur(20px) brightness(1.05);
+    backdrop-filter: blur(20px);
     display: flex;
     gap: var(--gap-3);
     animation-name: menu-appear;
