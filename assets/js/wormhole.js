@@ -2,20 +2,29 @@ window.addEventListener('load', () => new Wormhole());
 
 class Wormhole
 {
+    static get ASPECT_RATIO() { return window.innerWidth / window.innerHeight; }
+    static get CANVAS_MAX_WIDTH() { return 1440; }
+    static get CANVAS_MAX_HEIGHT() { return this.CANVAS_MAX_WIDTH / Wormhole.ASPECT_RATIO; }
+    static get CANVAS_TARGET_WIDTH() { return window.innerWidth; }
+    static get CANVAS_TARGET_HEIGHT() { return window.innerHeight; }
+    static get RESOLUTION_SCALE() { return this.CANVAS_WIDTH / this.CANVAS_MAX_WIDTH; }
+    static get CANVAS_WIDTH() { return Math.min(Wormhole.CANVAS_TARGET_WIDTH, Wormhole.CANVAS_MAX_WIDTH); }
+    static get CANVAS_HEIGHT() { return Math.min(Wormhole.CANVAS_TARGET_HEIGHT, Wormhole.CANVAS_MAX_HEIGHT); }
     static get ENTITY_COUNT() { return 50; }
     static get ENTITY_SPEED() { return -0.25 / 1000; }
-    static get GRADIENT_SIZE() { return 0.6; }
     static get SHOCKWAVE_SIZE_MULTIPLIER() { return 0.75; }
     static get SHOCKWAVE_MAX_DISTANCE() { return 0.2; }
     static get SHOCKWAVE_SPEED_MULTIPLIER() { return 20; }
-    static get FLAIR_MIN_COUNT() { return 0; }
-    static get FLAIR_MAX_COUNT() { return 4; }
+    static get RECTANGLE_WIDTH() { return 2.5; }
+    static get RECTANGLE_HEIGHT() { return 1.7; }
+    static get FLAIR_MIN_COUNT() { return 1; }
+    static get FLAIR_MAX_COUNT() { return 5; }
+    static get FLAIR_SIZE() { return 13; }
     static get FLAIR_MIN_SIZE() { return 0.4; }
-    static get FLAIR_MAX_SIZE() { return 1.2; }
+    static get FLAIR_MAX_SIZE() { return 1.3; }
     static get FLAIR_PADDING() { return -0.1; }
 
-    get maxRectangleSize() { return Math.min(this.canvasWidth, this.canvasHeight); }
-    get gradientSize() { return this.maxRectangleSize * Wormhole.GRADIENT_SIZE; }
+    get maxRectangleSize() { return Math.min(Wormhole.CANVAS_WIDTH, Wormhole.CANVAS_HEIGHT); }
     get shockwaveSquared() { return this.shockWave * this.shockWave; }
 
     constructor()
@@ -43,12 +52,12 @@ class Wormhole
 
         this.canvas = this.canvasElement.getContext("2d", { alpha: false });
 
-        this.canvasElement.width = window.innerWidth;
-        this.canvasElement.height = window.innerHeight;
+        this.canvasElement.width = Wormhole.CANVAS_WIDTH;
+        this.canvasElement.height = Wormhole.CANVAS_HEIGHT;
 
         addEventListener('resize', () => {
-            this.canvasElement.width = window.innerWidth;
-            this.canvasElement.height = window.innerHeight;
+            this.canvasElement.width = Wormhole.CANVAS_WIDTH;
+            this.canvasElement.height = Wormhole.CANVAS_HEIGHT;
         });
 
         this.createEntities();
@@ -66,9 +75,6 @@ class Wormhole
 
     update()
     {
-        this.canvasWidth = this.canvasElement.width;
-        this.canvasHeight = this.canvasElement.height;
-
         this.targetSourceX = Wormhole.lerp(0.3, 0.7, 1 - this.cursorPositionX);
         this.targetSourceY = Wormhole.lerp(0.3, 0.7, 1 - this.cursorPositionY);
 
@@ -89,39 +95,16 @@ class Wormhole
         this.canvas.fillRect(
             0,
             0,
-            this.canvasWidth,
-            this.canvasHeight
-        );
-
-        this.canvas.fillStyle = this.getFillGradient();
-        this.fillCenteredRect(
-            this.sourceX * this.canvasWidth,
-            this.sourceY * this.canvasHeight,
-            this.gradientSize,
-            this.gradientSize
+            Wormhole.CANVAS_WIDTH,
+            Wormhole.CANVAS_HEIGHT
         );
 
         this.shockWave += Wormhole.ENTITY_SPEED * Wormhole.SHOCKWAVE_SPEED_MULTIPLIER;
         this.shockWave = Wormhole.rotateClamp(this.shockWave);
 
-        this.entities.forEach((entity) => entity.update());
-    }
-
-    getFillGradient()
-    {
-        let gradient = this.canvas.createRadialGradient(
-            this.sourceX * this.canvasWidth,
-            this.sourceY * this.canvasHeight,
-            0,
-            this.sourceX * this.canvasWidth,
-            this.sourceY * this.canvasHeight,
-            this.gradientSize
-        );
-
-        gradient.addColorStop(0, '#dadde5');
-        gradient.addColorStop(0.5, '#C6DAE4');
-
-        return gradient;
+        this.entities.sort((entityA, entityB) => { return entityA.progress > entityB.progress ? -1 : 1; });
+        this.entities.forEach((entity) => entity.render());
+        this.entities.forEach((entity) => entity.renderFlairs());
     }
 
     fillCenteredRect(x, y, width, height)
@@ -149,6 +132,14 @@ class Wormhole
         let diff = b - a;
         let tt = clamp ? Math.max(0, Math.min(1, t)) : t;
         return a + diff * tt;
+    }
+
+    static inverseLerp(a, b, t, clamp = true)
+    {
+        let diff = b - a;
+        let ratio = (t - a) / diff;
+
+        return clamp ? Math.max(0, Math.min(1, ratio)) : ratio;
     }
 
     static rotateClamp(value, min = 0, max = 1)
@@ -186,6 +177,40 @@ class Wormhole
 
         return Wormhole.lerp(Wormhole.lerp(a, b, cutoffRatio), c, (ratio - cutoffRatio) / (1 - cutoffRatio));
     }
+
+    static rgbToHex(r, g, b)
+    {
+        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+    }
+
+    static hexToRgb(hex)
+    {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    static degreesToRadians(degrees)
+    {
+        return (Math.PI / 180) * degrees;
+    }
+
+    static radiansToDegrees(radians)
+    {
+        return radians * (180 / Math.PI);
+    }
+
+    static distribute(x, distributeFunction = (x) => x, min = 0, max = 1)
+    {
+        const ratio = Wormhole.inverseLerp(min, max, x); // 0 .. 1
+        const tilted = (ratio - 0.5) * 2; // -1 .. 1
+        const sign = tilted < 0 ? -1 : 1; // -1 / 1
+
+        return distributeFunction(Math.abs(tilted)) * sign;
+    }
 }
 
 class WormholeEntity
@@ -201,9 +226,13 @@ class WormholeEntity
         this.flairOpacity = 0;
         this.rotation = 0;
         this.flairs = [];
+        this.sizeMultiplier = 1;
+
+        this.backgroundR = 0;
+        this.backgroundG = 0;
+        this.backgroundB = 0;
 
         this.generateFlairs();
-        this.update(0);
     }
 
     generateFlairs()
@@ -213,62 +242,37 @@ class WormholeEntity
 
         for (let i = 0; i < flairCount; i++) {
             this.flairs[i] = new WormholeFlair(
+                this,
                 this.wormhole,
-                Wormhole.random(Wormhole.FLAIR_PADDING, 1 - Wormhole.FLAIR_PADDING),
-                Wormhole.random(Wormhole.FLAIR_PADDING, 1 - Wormhole.FLAIR_PADDING),
+                Wormhole.distribute(Wormhole.random(Wormhole.FLAIR_PADDING, 1 - Wormhole.FLAIR_PADDING), (x => Math.pow(x, 2))),
+                Wormhole.distribute(Wormhole.random(Wormhole.FLAIR_PADDING, 1 - Wormhole.FLAIR_PADDING), (y => Math.pow(y, 2))),
                 Wormhole.random(Wormhole.FLAIR_MIN_SIZE, Wormhole.FLAIR_MAX_SIZE)
             );
         }
     }
 
-    update()
+    tick()
     {
         this.progress += Wormhole.ENTITY_SPEED;
-        this.progress = Wormhole.rotateClamp(this.progress);
+        this.progress = Wormhole.rotateClamp(this.progress, 0, 1);
+    }
 
+    update()
+    {
         this.width = this.progress * this.progress * 2;
         this.height = this.progress * this.progress * 2;
 
         this.opacity = Wormhole.cutoff(this.progress, 0.5, 0, 0.7, 0);
         this.rotation = Wormhole.cutoff(this.progress, 0.55, -90, 420, 240);
-        //this.flairOpacity = Wormhole.cutoff(this.progress, 0.4, 0, 0.9, 0, 0.5);
+        this.flairOpacity = Math.min(1, this.progress * 2);
 
-        let flairFade = 0.4;
-        let flairFadeMax = 0.5;
-        this.flairOpacity = Wormhole.lerp(0, 0.8, this.progress * 2);
-        if (this.progress > flairFade) {
-            let zeroRatio = Math.min(1, (this.progress - flairFade) / (1 - flairFadeMax));
-            this.flairOpacity = Wormhole.lerp(Wormhole.lerp(0, 0.8, flairFade * 2), 0, zeroRatio);
-        }
+        let shockwaveMaxDistanceFaded = Wormhole.lerp(Wormhole.SHOCKWAVE_MAX_DISTANCE, 0, Math.sqrt(this.progress));
+        let progressDistance = Wormhole.distanceMultiplier(this.progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
 
-        this.render();
-    }
+        this.sizeMultiplier = Wormhole.lerp(1, Wormhole.SHOCKWAVE_SIZE_MULTIPLIER, Wormhole.lerp(progressDistance, 0, this.progress * 2));
 
-    render()
-    {
-        let progress = this.progress;
-
-        let shockwaveMaxDistanceFaded = Wormhole.lerp(Wormhole.SHOCKWAVE_MAX_DISTANCE, 0, Math.sqrt(progress));
-        let progressDistance = Wormhole.distanceMultiplier(progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
-
-        let sizeMultiplier = Wormhole.lerp(1, Wormhole.SHOCKWAVE_SIZE_MULTIPLIER, Wormhole.lerp(progressDistance, 0, progress * 2));
-
-        let rectWidth = this.width * this.wormhole.maxRectangleSize * 2.5;
-        let rectHeight = this.height * this.wormhole.maxRectangleSize * 1.7;
-
-        if (rectHeight < 10) {
-            return;
-        }
-
-        let originalRectWidth = rectWidth;
-        let originalRectHeight = rectHeight;
-        rectWidth *= sizeMultiplier;
-        rectHeight *= sizeMultiplier;
-
-        let sizeRatio = originalRectHeight / this.wormhole.maxRectangleSize;
-
-        let spaceX = this.wormhole.canvasWidth - rectWidth;
-        let spaceY = this.wormhole.canvasHeight - rectHeight;
+        let spaceX = Wormhole.CANVAS_WIDTH - this.scaledRectangleWidth;
+        let spaceY = Wormhole.CANVAS_HEIGHT - this.scaledRectangleHeight;
 
         let rectPositionX = this.wormhole.sourceX;
         let rectPositionY = this.wormhole.sourceY;
@@ -276,12 +280,40 @@ class WormholeEntity
         this.wormhole.canvas.save();
 
         this.wormhole.canvas.globalAlpha = this.opacity;
-        this.wormhole.canvas.translate(rectPositionX * spaceX + rectWidth / 2, rectPositionY * spaceY + rectHeight / 2);
-        this.wormhole.canvas.rotate((Math.PI / 180) * this.rotation);
+        this.wormhole.canvas.translate(rectPositionX * spaceX + this.scaledRectangleWidth / 2, rectPositionY * spaceY + this.scaledRectangleHeight / 2);
+        this.wormhole.canvas.rotate(Wormhole.degreesToRadians(this.rotation));
+    }
 
-        this.wormhole.strokeCenteredRect(0, 0, rectWidth, rectHeight);
+    get rectangleWidth() { return this.width * this.wormhole.maxRectangleSize * Wormhole.RECTANGLE_WIDTH; }
+    get rectangleHeight() { return this.height * this.wormhole.maxRectangleSize * Wormhole.RECTANGLE_HEIGHT; }
+    get scaledRectangleWidth() { return this.rectangleWidth * this.sizeMultiplier; }
+    get scaledRectangleHeight() { return this.rectangleHeight * this.sizeMultiplier; }
 
-        this.flairs.forEach((flair) => flair.render(sizeRatio, this.flairOpacity, originalRectWidth, originalRectHeight));
+    render()
+    {
+        this.tick();
+        this.update();
+
+        if (Math.min(this.rectangleWidth, this.rectangleHeight) > 10) {
+            let colorT = Wormhole.lerp(this.progress, Math.sqrt(this.progress), 0.25);
+
+            this.backgroundR = Math.round(Wormhole.lerp(30, 210, colorT));
+            this.backgroundG = Math.round(Wormhole.lerp(60, 210, colorT));
+            this.backgroundB = Math.round(Wormhole.lerp(90, 210, colorT));
+
+            this.wormhole.canvas.fillStyle = `rgb(${this.backgroundR}, ${this.backgroundG}, ${this.backgroundB})`;
+            this.wormhole.fillCenteredRect(0, 0, this.scaledRectangleWidth, this.scaledRectangleHeight);
+        }
+
+        this.wormhole.canvas.restore();
+
+    }
+
+    renderFlairs()
+    {
+        this.update();
+
+        this.flairs.forEach((flair) => flair.render());
 
         this.wormhole.canvas.restore();
     }
@@ -289,8 +321,9 @@ class WormholeEntity
 
 class WormholeFlair
 {
-    constructor(wormhole, x, y, size)
+    constructor(entity, wormhole, x, y, size)
     {
+        this.entity = entity;
         this.wormhole = wormhole;
 
         this.x = x;
@@ -298,21 +331,53 @@ class WormholeFlair
         this.size = size;
     }
 
-    render(sizeRatio, opacity, originalRectWidth, originalRectHeight)
-    {
-        let flairSize = this.size * sizeRatio * (this.wormhole.maxRectangleSize / 100);
-        let flairSizeRatio = Math.min(1, flairSize / 5);
+    get flairSize() { return this.size * Wormhole.FLAIR_SIZE * Wormhole.RESOLUTION_SCALE; }
 
-        if (flairSizeRatio < 0.01) {
+    render()
+    {
+        const sizeRatio = Math.sqrt(this.entity.progress);
+
+        let flairSize = sizeRatio * this.flairSize;
+        let flairSizeRatio = Math.min(1, flairSize / this.flairSize * 2);
+        flairSizeRatio *= flairSizeRatio;
+
+        if (flairSizeRatio < 0.1) {
             return;
         }
 
-        this.wormhole.canvas.globalAlpha = Wormhole.lerp(0, opacity, flairSizeRatio);
-        this.wormhole.canvas.strokeRect(
-            -originalRectWidth / 2 + originalRectWidth * this.x - flairSize / 2,
-            -originalRectHeight / 2 + originalRectHeight * this.y - flairSize / 2,
-            flairSize,
-            flairSize
+        this.wormhole.canvas.globalAlpha = Wormhole.lerp(0, this.entity.flairOpacity, flairSizeRatio);
+
+        const xPos = -this.entity.rectangleWidth / 2 + this.entity.rectangleWidth * this.x - flairSize / 2;
+        const yPos = -this.entity.rectangleHeight / 2 + this.entity.rectangleHeight * this.y - flairSize / 2;
+
+        this.wormhole.canvas.beginPath();
+        this.wormhole.canvas.arc(
+            xPos,
+            yPos,
+            flairSize / 2,
+            0,
+            (Math.PI / 180) * 360
         );
+
+        const counterRotation = -Wormhole.degreesToRadians(this.entity.rotation);
+        const offsetX = Math.sin(counterRotation);
+        const offsetY = Math.cos(counterRotation);
+        const offset = flairSize / 6;
+
+        const gradient = this.wormhole.canvas.createRadialGradient(
+            xPos + offsetX * offset,
+            yPos - offsetY * offset,
+            0,
+            xPos + offsetX * offset,
+            yPos - offsetY * offset,
+            flairSize / 2
+        );
+
+        gradient.addColorStop(0, '#afd1e5'); // rgb(175,209,229)
+        gradient.addColorStop(0.45, '#73a8c2'); // rgb(115,168,194)
+        gradient.addColorStop(1, '#698493') // rgb(105,132,147)
+
+        this.wormhole.canvas.fillStyle = gradient; //'#000000';
+        this.wormhole.canvas.fill()
     }
 }
