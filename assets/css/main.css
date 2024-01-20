@@ -55,15 +55,13 @@ header#main-header > #content {
 }
 
 header#main-header > #content > nav.main {
-    padding: var(--gap-2);
-    background: rgba(255,255,255,.2);
     width: fit-content;
+    padding: var(--gap-2) var(--gap-3);
     margin-left: auto;
     border-radius: 0.5rem;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(20px);
     display: flex;
-    gap: 1rem;
-    box-shadow: 7px 7px 20px -5px rgba(0,0,0,.3);
+    gap: var(--gap-3);
     animation-name: menu-appear;
     animation-duration: 1.5s;
     animation-iteration-count: 1;
@@ -71,18 +69,11 @@ header#main-header > #content > nav.main {
 }
 
 header#main-header > #content > nav.main > button {
-    padding: var(--gap-1) var(--gap-2);
-    background: #3a5268;
-    color: #c9dbe6;
-    border-radius: 0.25rem;
-}
-
-header#main-header > #content > nav.main > button:hover {
-    background: #172d40;
-    transform: scale(1.05);
-}
-header#main-header > #content > nav.main > button:active {
-    transform: scale(1);
+    color: #314555;
+    background: transparent;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    cursor: pointer;
 }
 
 canvas#wormhole {

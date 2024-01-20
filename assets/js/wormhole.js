@@ -3,15 +3,15 @@ window.addEventListener('load', () => new Wormhole());
 class Wormhole
 {
     static get ASPECT_RATIO() { return window.innerWidth / window.innerHeight; }
-    static get CANVAS_MAX_WIDTH() { return 1440; }
+    static get CANVAS_MAX_WIDTH() { return 1100; }
     static get CANVAS_MAX_HEIGHT() { return this.CANVAS_MAX_WIDTH / Wormhole.ASPECT_RATIO; }
     static get CANVAS_TARGET_WIDTH() { return window.innerWidth; }
     static get CANVAS_TARGET_HEIGHT() { return window.innerHeight; }
     static get RESOLUTION_SCALE() { return this.CANVAS_WIDTH / this.CANVAS_MAX_WIDTH; }
     static get CANVAS_WIDTH() { return Math.min(Wormhole.CANVAS_TARGET_WIDTH, Wormhole.CANVAS_MAX_WIDTH); }
     static get CANVAS_HEIGHT() { return Math.min(Wormhole.CANVAS_TARGET_HEIGHT, Wormhole.CANVAS_MAX_HEIGHT); }
-    static get ENTITY_PRECISION() { return 2550; }
-    static get ENTITY_COUNT() { return 50; }
+    static get ENTITY_PRECISION() { return 5000; }
+    static get ENTITY_COUNT() { return 40; }
     static get ENTITY_SPEED() { return -0.25; }
     static get SHOCKWAVE_SIZE_MULTIPLIER() { return 0.75; }
     static get SHOCKWAVE_MAX_DISTANCE() { return 0.2; }
@@ -20,7 +20,7 @@ class Wormhole
     static get RECTANGLE_HEIGHT() { return 1.7; }
     static get FLAIR_MIN_COUNT() { return 1; }
     static get FLAIR_MAX_COUNT() { return 5; }
-    static get FLAIR_SIZE() { return 13; }
+    static get FLAIR_SIZE() { return 13 * (Wormhole.CANVAS_MAX_WIDTH / 1440); }
     static get FLAIR_MIN_SIZE() { return 0.4; }
     static get FLAIR_MAX_SIZE() { return 1.3; }
     static get FLAIR_PADDING() { return -0.1; }
@@ -81,8 +81,8 @@ class Wormhole
         this.targetSourceX = Wormhole.lerp(0.3, 0.7, 1 - this.cursorPositionX);
         this.targetSourceY = Wormhole.lerp(0.3, 0.7, 1 - this.cursorPositionY);
 
-        this.sourceX = Wormhole.lerp(this.sourceX, this.targetSourceX, 0.02);
-        this.sourceY = Wormhole.lerp(this.sourceY, this.targetSourceY, 0.02);
+        this.sourceX = Wormhole.lerp(this.sourceX, this.targetSourceX, 0.02 * this.framerateSpeed);
+        this.sourceY = Wormhole.lerp(this.sourceY, this.targetSourceY, 0.02 * this.framerateSpeed);
 
         this.renderFrame();
 
@@ -268,7 +268,7 @@ class WormholeEntity
 
     tick()
     {
-        this.virtualProgress += this.wormhole.entitySpeed;
+        this.virtualProgress += this.wormhole.entitySpeed * (Wormhole.ENTITY_PRECISION / 1000);
         this.virtualProgress = Wormhole.rotateClamp(this.virtualProgress, 0, Wormhole.ENTITY_PRECISION, () => {
             this.backgroundR = -1;
             this.backgroundG = -1;
@@ -330,7 +330,12 @@ class WormholeEntity
             this.backgroundB = Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.01 * this.wormhole.framerateSpeed);
 
             this.wormhole.canvas.fillStyle = `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`;
-            this.wormhole.fillCenteredRect(0, 0, this.scaledRectangleWidth, this.scaledRectangleHeight);
+
+            //this.wormhole.fillCenteredRect(0, 0, this.scaledRectangleWidth, this.scaledRectangleHeight);
+
+            this.wormhole.canvas.beginPath();
+            this.wormhole.canvas.ellipse(0, 0, this.scaledRectangleWidth / 2, this.scaledRectangleHeight / 2, 0, 0, Wormhole.degreesToRadians(360));
+            this.wormhole.canvas.fill();
         }
 
         this.wormhole.canvas.restore();
