@@ -44,14 +44,10 @@ class Wormhole
         this.shockWave = 1;
 
         this.canvasElement = document.getElementById('wormhole');
-        this.canvasElement.addEventListener('mousemove', (event) => {
+        document.addEventListener('mousemove', (event) => {
             this.cursorPositionX = event.x / window.innerWidth;
             this.cursorPositionY = event.y / window.innerHeight;
         });
-        this.canvasElement.addEventListener('mouseleave', () => {
-            this.cursorPositionX = 0.5;
-            this.cursorPositionY = 0.5;
-        })
 
         this.canvas = this.canvasElement.getContext("2d", { alpha: false });
         this.canvasElement.width = Wormhole.CANVAS_WIDTH;
