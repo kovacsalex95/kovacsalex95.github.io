@@ -3,7 +3,7 @@ window.addEventListener('load', () => new Wormhole());
 class Wormhole
 {
     static get ASPECT_RATIO() { return window.innerWidth / window.innerHeight; }
-    static get CANVAS_MAX_WIDTH() { return 1100; }
+    static get CANVAS_MAX_WIDTH() { return 1440; }
     static get CANVAS_MAX_HEIGHT() { return this.CANVAS_MAX_WIDTH / Wormhole.ASPECT_RATIO; }
     static get CANVAS_TARGET_WIDTH() { return window.innerWidth; }
     static get CANVAS_TARGET_HEIGHT() { return window.innerHeight; }
