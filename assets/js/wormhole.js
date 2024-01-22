@@ -2,32 +2,17 @@ window.addEventListener('load', () => new Wormhole());
 
 class Wormhole
 {
-    static get ASPECT_RATIO() { return window.innerWidth / window.innerHeight; }
-    static get CANVAS_MAX_WIDTH() { return 1440; }
-    static get CANVAS_MAX_HEIGHT() { return this.CANVAS_MAX_WIDTH / Wormhole.ASPECT_RATIO; }
-    static get CANVAS_TARGET_WIDTH() { return window.innerWidth; }
-    static get CANVAS_TARGET_HEIGHT() { return window.innerHeight; }
-    static get CANVAS_TARGET_SIZE() { return Math.min(Wormhole.CANVAS_TARGET_WIDTH, Wormhole.CANVAS_TARGET_HEIGHT); }
-    static get CANVAS_WIDTH() { return Math.min(Wormhole.CANVAS_TARGET_WIDTH, Wormhole.CANVAS_MAX_WIDTH); }
-    static get CANVAS_HEIGHT() { return Math.min(Wormhole.CANVAS_TARGET_HEIGHT, Wormhole.CANVAS_MAX_HEIGHT); }
+    static get TARGET_SCREEN_SIZE() { return 1080; }
     static get ENTITY_PRECISION() { return 5000; }
     static get ENTITY_COUNT() { return 40; }
-    static get NODE_COUNT() { return [0, 5]; }
-    static get NODE_SIZE() { return 0.01 * Wormhole.CANVAS_TARGET_SIZE; }
-    static get NODE_Z() { return Wormhole.CANVAS_WIDTH / 3; }
-    static get NODE_MIN_DISTANCE() { return Wormhole.CANVAS_WIDTH * 0.2; }
-    static get NODE_MAX_DISTANCE() { return Wormhole.CANVAS_WIDTH * 0.5; }
-    static get NODE_MAX_CONNECTIONS() { return 3; }
+    static get NODE_COUNT() { return [2, 6]; }
+    static get NODE_MAX_CONNECTIONS() { return 2; }
     static get ENTITY_SPEED() { return -0.25; }
     static get SHOCKWAVE_SIZE_MULTIPLIER() { return 0.75; }
     static get SHOCKWAVE_MAX_DISTANCE() { return 0.2; }
     static get SHOCKWAVE_SPEED_MULTIPLIER() { return 20; }
     static get RECTANGLE_WIDTH() { return 2; }
     static get RECTANGLE_HEIGHT() { return 1.3; }
-
-    get maxRectangleSize() { return Math.min(Wormhole.CANVAS_WIDTH, Wormhole.CANVAS_HEIGHT); }
-    get shockwaveSquared() { return this.shockWave * this.shockWave; }
-    get entitySpeed() { return Wormhole.ENTITY_SPEED * this.framerateSpeed; }
 
     constructor()
     {
@@ -42,6 +27,7 @@ class Wormhole
 
         this.entities = [];
         this.nodes = [];
+        this.timers = {};
 
         this.shockWave = 1;
 
@@ -52,18 +38,54 @@ class Wormhole
         });
 
         this.canvas = this.canvasElement.getContext("2d", { alpha: false });
-        this.canvasElement.width = Wormhole.CANVAS_WIDTH;
-        this.canvasElement.height = Wormhole.CANVAS_HEIGHT;
+
+        this.canvasWidth = 0;
+        this.canvasHeight = 0;
+        this.canvasSize = 0;
+
+        this.resolutionScale = 1;
+        this.resolutionX = 0;
+        this.resolutionY = 0;
+        this.resolutionSize = 0;
+
+        this.screenScale = 1;
+
+        this.updateResolution();
 
         addEventListener('resize', () => {
-            this.canvasElement.width = Wormhole.CANVAS_WIDTH;
-            this.canvasElement.height = Wormhole.CANVAS_HEIGHT;
+            this.updateResolution();
         });
 
         this.createEntities();
         this.createNodes();
 
         requestAnimationFrame(() => this.update());
+    }
+
+    get maximumResolution() { return 1280*720; }
+    get nodeSize() { return 18 * this.screenScale; }
+    get nodeZ() { return this.resolutionSize * 0.1; }
+    get nodeMinDistance() { return this.resolutionSize * 0.45; }
+    get nodeMaxDistance() { return this.resolutionSize * 0.6; }
+    get shockwaveSquared() { return this.shockWave * this.shockWave; }
+    get entitySpeed() { return Wormhole.ENTITY_SPEED * this.framerateSpeed; }
+
+    updateResolution()
+    {
+        this.canvasWidth = this.canvasElement.parentElement.clientWidth;
+        this.canvasHeight = this.canvasElement.parentElement.clientHeight;
+        this.canvasSize = Math.min(this.canvasWidth, this.canvasHeight);
+
+        const fullResolution = this.canvasWidth * this.canvasHeight;
+        this.resolutionScale = fullResolution > 0 ? Math.min(1, this.maximumResolution / fullResolution) : 1;
+        this.screenScale = this.canvasSize / Wormhole.TARGET_SCREEN_SIZE * this.resolutionScale;
+
+        this.resolutionX = Math.round(this.canvasWidth * this.resolutionScale);
+        this.resolutionY = Math.round(this.canvasHeight * this.resolutionScale);
+        this.resolutionSize = Math.min(this.resolutionX, this.resolutionY);
+
+        this.canvasElement.width = this.resolutionX;
+        this.canvasElement.height = this.resolutionY;
     }
 
     createEntities()
@@ -109,6 +131,7 @@ class Wormhole
 
         this.renderFrame();
 
+        Object.keys(this.timers).forEach(key => this.timers[key] += elapsed )
         requestAnimationFrame(() => this.update());
     }
 
@@ -121,8 +144,8 @@ class Wormhole
         this.canvas.fillRect(
             0,
             0,
-            Wormhole.CANVAS_WIDTH,
-            Wormhole.CANVAS_HEIGHT
+            this.resolutionX,
+            this.resolutionY
         );
 
         this.shockWave += this.entitySpeed * Wormhole.SHOCKWAVE_SPEED_MULTIPLIER * 0.001;
@@ -133,12 +156,12 @@ class Wormhole
 
         this.nodes.sort((nodeA, nodeB) => { return nodeA.positionZ > nodeB.positionZ ? -1 : 1 });
 
-        this.renderNodeConnections();
-
-        this.nodes.forEach((node) => node.render());
+        this.connectNodes();
+        const nodeTick = this.tickTimer('nodeReconnect', 0.5);
+        this.nodes.forEach((node) => node.render(nodeTick));
     }
 
-    renderNodeConnections()
+    connectNodes()
     {
         this.nodes.forEach(nodeA => {
             if (nodeA.connections.length > 0) {
@@ -152,40 +175,53 @@ class Wormhole
                     return;
                 }
 
-                if (nodeA.connections.length >= Wormhole.NODE_MAX_CONNECTIONS) {
-                    return;
-                }
-
                 if (nodeA.hasConnectionWith(nodeB)) {
                     return;
                 }
 
                 let distance = Wormhole.nodeDistance(nodeA, nodeB);
-                if (distance > Wormhole.NODE_MAX_DISTANCE) {
+                if (distance > this.nodeMaxDistance) {
                     return;
                 }
 
                 nodeA.connections.push(nodeB);
             });
-        });
 
-        this.canvas.save();
+            if (nodeA.connections.length <= Wormhole.NODE_MAX_CONNECTIONS) {
+                return;
+            }
 
-        this.nodes.filter(node => node.connections.length > 0).forEach(nodeA => {
-            nodeA.connections.forEach(nodeB => {
-                let distance = Wormhole.nodeDistance(nodeA, nodeB);
-                distance = Math.max(Wormhole.NODE_MIN_DISTANCE, Math.min(Wormhole.NODE_MAX_DISTANCE, distance));
-                const distanceRatio = 1 - Wormhole.inverseLerp(Wormhole.NODE_MIN_DISTANCE, Wormhole.NODE_MAX_DISTANCE, distance);
+            nodeA.connections.sort((nodeB1, nodeB2) => {
+                const distance1 = Math.pow(Wormhole.nodeDistance(nodeA, nodeB1), 2);
+                const distance2 = Math.pow(Wormhole.nodeDistance(nodeA, nodeB2), 2);
 
-                this.canvas.globalAlpha = ((nodeA.opacity + nodeB.opacity) / 2) * distanceRatio;
-                this.canvas.beginPath();
-                this.canvas.moveTo(nodeA.positionX, nodeA.positionY);
-                this.canvas.lineTo(nodeB.positionX, nodeB.positionY);
-                this.canvas.stroke();
+                return distance1 <= distance2 ? -1 : 1;
             });
-        });
 
-        this.canvas.restore();
+            while(nodeA.connections.length > Wormhole.NODE_MAX_CONNECTIONS) {
+                nodeA.connections.pop();
+            }
+        });
+    }
+
+    startTimer(name)
+    {
+        this.timers[name] = 0;
+    }
+
+    tickTimer(name, second)
+    {
+        if (false === Object.keys(this.timers).includes(name)) {
+            this.startTimer(name);
+        }
+
+        let tick = false;
+        while(this.timers[name] > second * 1000) {
+            this.timers[name] -= second * 1000;
+            tick = true;
+        }
+
+        return tick;
     }
 
     fillCenteredRect(x, y, width, height)
@@ -218,9 +254,8 @@ class Wormhole
     static inverseLerp(a, b, t, clamp = true)
     {
         let diff = b - a;
-        let ratio = (t - a) / diff;
-
-        return clamp ? Math.max(0, Math.min(1, ratio)) : ratio;
+        let normalT = clamp ? Math.max(a, Math.min(b, t)) : t;
+        return (normalT - a) / diff;
     }
 
     static rotateClamp(value, min = 0, max = 1, onClamp = null)
@@ -385,13 +420,13 @@ class WormholeEntity
         let progressDistance = Wormhole.distanceMultiplier(this.progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
         return Wormhole.lerp(progressDistance, 0, this.progress * 2);
     }
-    get rectangleWidth() { return this.width * this.wormhole.maxRectangleSize * Wormhole.RECTANGLE_WIDTH; }
-    get rectangleHeight() { return this.height * this.wormhole.maxRectangleSize * Wormhole.RECTANGLE_HEIGHT; }
+    get rectangleWidth() { return this.width * this.wormhole.resolutionSize * Wormhole.RECTANGLE_WIDTH; }
+    get rectangleHeight() { return this.height * this.wormhole.resolutionSize * Wormhole.RECTANGLE_HEIGHT; }
     get scaledRectangleWidth() { return this.rectangleWidth * this.sizeMultiplier; }
     get scaledRectangleHeight() { return this.rectangleHeight * this.sizeMultiplier; }
     get scaleRectangleSize() { return Math.min(this.scaledRectangleWidth, this.scaledRectangleHeight); }
-    get spaceX() { return Wormhole.CANVAS_WIDTH - this.scaledRectangleWidth; }
-    get spaceY() { return Wormhole.CANVAS_HEIGHT - this.scaledRectangleHeight; }
+    get spaceX() { return this.wormhole.resolutionX - this.scaledRectangleWidth; }
+    get spaceY() { return this.wormhole.resolutionY - this.scaledRectangleHeight; }
     get positionX() { return this.wormhole.sourceX * this.spaceX + this.scaledRectangleWidth / 2; }
     get positionY() { return this.wormhole.sourceY * this.spaceY + this.scaledRectangleHeight / 2; }
     get backgroundFillStyle() { return `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`; }
@@ -460,12 +495,14 @@ class WormholeNode
     get angleOffsetY() { return Math.cos(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize; }
     get positionX() { return this.entity.positionX + this.angleOffsetX; }
     get positionY() { return this.entity.positionY + this.angleOffsetY; }
-    get positionZ() { return this.entity.width * Wormhole.NODE_Z; }
+    get positionZ() { return this.entity.width * this.wormhole.nodeZ; }
     get opacity() { return Wormhole.lerp(1 - this.entity.progress, 0, 1 - Math.sqrt(this.entity.progress)); }
 
-    render()
+    render(tick = false)
     {
-        if (this.entity.reset) {
+        this.renderConnections();
+
+        if (tick) {
             this.connections = [];
         }
 
@@ -477,11 +514,33 @@ class WormholeNode
         this.wormhole.canvas.arc(
             this.positionX,
             this.positionY,
-            Wormhole.NODE_SIZE * this.size * this.entity.width,
+            this.wormhole.nodeSize * this.size * this.entity.width,
             0,
             Wormhole.degreesToRadians(360)
         );
 
         this.wormhole.canvas.fill();
+    }
+
+    renderConnections()
+    {
+        if (this.connections.length === 0) {
+            return;
+        }
+
+        this.wormhole.canvas.save();
+
+        this.connections.forEach(nodeB => {
+            let distance = Wormhole.nodeDistance(this, nodeB);
+            const distanceRatio = 1 - Wormhole.inverseLerp(this.wormhole.nodeMinDistance, this.wormhole.nodeMaxDistance, distance);
+
+            this.wormhole.canvas.globalAlpha = Math.min(this.opacity, nodeB.opacity) * distanceRatio;
+            this.wormhole.canvas.beginPath();
+            this.wormhole.canvas.moveTo(this.positionX, this.positionY);
+            this.wormhole.canvas.lineTo(nodeB.positionX, nodeB.positionY);
+            this.wormhole.canvas.stroke();
+        });
+
+        this.wormhole.canvas.restore();
     }
 }
