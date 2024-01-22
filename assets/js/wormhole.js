@@ -137,11 +137,9 @@ class Wormhole
 
     connectNodes()
     {
-        this.nodes.forEach(nodeA => {
-            if (nodeA.connections.length > 0) {
-                return;
-            }
-
+        this.nodes
+            .filter(node => node.connections.length === 0)
+            .forEach(nodeA => {
             this.nodes
                 .filter(nodeB => nodeB.connections.length < Wormhole.NODE_MAX_CONNECTIONS && !nodeB.hasConnectionWith(nodeA))
                 .forEach(nodeB => {
