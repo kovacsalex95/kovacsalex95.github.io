@@ -15,6 +15,13 @@ class Wormhole
     static get RECTANGLE_WIDTH() { return 2; }
     static get RECTANGLE_HEIGHT() { return 1.3; }
 
+    get nodeSize() { return 18 * this.screenScale; }
+    get nodeZ() { return this.resolutionSize * 0.15; }
+    get nodeMinDistance() { return this.resolutionSize * 0.4; }
+    get nodeMaxDistance() { return this.resolutionSize * 0.55; }
+    get shockwaveSquared() { return this.shockWave * this.shockWave; }
+    get entitySpeed() { return Wormhole.ENTITY_SPEED * this.framerateSpeed; }
+
     constructor()
     {
         this.lastFrame = Date.now();
@@ -63,34 +70,9 @@ class Wormhole
         requestAnimationFrame(() => this.update());
     }
 
-    get nodeSize() { return 18 * this.screenScale; }
-    get nodeZ() { return this.resolutionSize * 0.1; }
-    get nodeMinDistance() { return this.resolutionSize * 0.45; }
-    get nodeMaxDistance() { return this.resolutionSize * 0.6; }
-    get shockwaveSquared() { return this.shockWave * this.shockWave; }
-    get entitySpeed() { return Wormhole.ENTITY_SPEED * this.framerateSpeed; }
-
-    updateResolution()
-    {
-        this.canvasWidth = this.canvasElement.parentElement.clientWidth;
-        this.canvasHeight = this.canvasElement.parentElement.clientHeight;
-        this.canvasSize = Math.min(this.canvasWidth, this.canvasHeight);
-
-        const fullResolution = this.canvasWidth * this.canvasHeight;
-        this.resolutionScale = fullResolution > 0 ? Math.min(1, Wormhole.MAXIMUM_RESOLUTION / fullResolution) : 1;
-        this.screenScale = this.canvasSize / Wormhole.TARGET_SCREEN_SIZE * this.resolutionScale;
-
-        this.resolutionX = Math.round(this.canvasWidth * this.resolutionScale);
-        this.resolutionY = Math.round(this.canvasHeight * this.resolutionScale);
-        this.resolutionSize = Math.min(this.resolutionX, this.resolutionY);
-
-        this.canvasElement.width = this.resolutionX;
-        this.canvasElement.height = this.resolutionY;
-    }
-
     createEntities()
     {
-        let progressFragments = 1 / Wormhole.ENTITY_COUNT;
+        const progressFragments = 1 / Wormhole.ENTITY_COUNT;
 
         for (let i = 0; i < Wormhole.ENTITY_COUNT; i++) {
             this.entities[i] = new WormholeEntity(this, i * progressFragments);
@@ -135,6 +117,67 @@ class Wormhole
         requestAnimationFrame(() => this.update());
     }
 
+    updateResolution()
+    {
+        this.canvasWidth = this.canvasElement.parentElement.clientWidth;
+        this.canvasHeight = this.canvasElement.parentElement.clientHeight;
+        this.canvasSize = Math.min(this.canvasWidth, this.canvasHeight);
+
+        const fullResolution = this.canvasWidth * this.canvasHeight;
+        this.resolutionScale = fullResolution > 0 ? Math.min(1, Wormhole.MAXIMUM_RESOLUTION / fullResolution) : 1;
+        this.screenScale = this.canvasSize / Wormhole.TARGET_SCREEN_SIZE * this.resolutionScale;
+
+        this.resolutionX = Math.round(this.canvasWidth * this.resolutionScale);
+        this.resolutionY = Math.round(this.canvasHeight * this.resolutionScale);
+        this.resolutionSize = Math.min(this.resolutionX, this.resolutionY);
+
+        this.canvasElement.width = this.resolutionX;
+        this.canvasElement.height = this.resolutionY;
+    }
+
+    connectNodes()
+    {
+        this.nodes.forEach(nodeA => {
+            if (nodeA.connections.length > 0) {
+                return;
+            }
+
+            this.nodes
+                .filter(nodeB => nodeB.connections.length < Wormhole.NODE_MAX_CONNECTIONS && !nodeB.hasConnectionWith(nodeA))
+                .forEach(nodeB => {
+                    if (nodeB.index === nodeA.index) {
+                        return;
+                    }
+
+                    if (nodeA.hasConnectionWith(nodeB)) {
+                        return;
+                    }
+
+                    const distance = Wormhole.nodeDistance(nodeA, nodeB);
+                    if (distance > this.nodeMaxDistance) {
+                        return;
+                    }
+
+                    nodeA.connections.push(nodeB);
+                });
+
+            if (nodeA.connections.length <= Wormhole.NODE_MAX_CONNECTIONS) {
+                return;
+            }
+
+            nodeA.connections.sort((nodeB1, nodeB2) => {
+                const distance1 = Math.pow(Wormhole.nodeDistance(nodeA, nodeB1), 2);
+                const distance2 = Math.pow(Wormhole.nodeDistance(nodeA, nodeB2), 2);
+
+                return distance1 <= distance2 ? -1 : 1;
+            });
+
+            while(nodeA.connections.length > Wormhole.NODE_MAX_CONNECTIONS) {
+                nodeA.connections.pop();
+            }
+        });
+    }
+
     renderFrame()
     {
         this.canvas.globalAlpha = 1;
@@ -154,54 +197,9 @@ class Wormhole
         this.entities.sort((entityA, entityB) => { return entityA.progress > entityB.progress ? -1 : 1; });
         this.entities.forEach((entity) => entity.render());
 
-        this.nodes.sort((nodeA, nodeB) => { return nodeA.positionZ > nodeB.positionZ ? -1 : 1 });
-
         this.connectNodes();
         const nodeTick = this.tickTimer('nodeReconnect', 0.5);
         this.nodes.forEach((node) => node.render(nodeTick));
-    }
-
-    connectNodes()
-    {
-        this.nodes.forEach(nodeA => {
-            if (nodeA.connections.length > 0) {
-                return;
-            }
-
-            this.nodes
-                .filter(nodeB => nodeB.connections.length < Wormhole.NODE_MAX_CONNECTIONS && !nodeB.hasConnectionWith(nodeA))
-                .forEach(nodeB => {
-                if (nodeB.index === nodeA.index) {
-                    return;
-                }
-
-                if (nodeA.hasConnectionWith(nodeB)) {
-                    return;
-                }
-
-                let distance = Wormhole.nodeDistance(nodeA, nodeB);
-                if (distance > this.nodeMaxDistance) {
-                    return;
-                }
-
-                nodeA.connections.push(nodeB);
-            });
-
-            if (nodeA.connections.length <= Wormhole.NODE_MAX_CONNECTIONS) {
-                return;
-            }
-
-            nodeA.connections.sort((nodeB1, nodeB2) => {
-                const distance1 = Math.pow(Wormhole.nodeDistance(nodeA, nodeB1), 2);
-                const distance2 = Math.pow(Wormhole.nodeDistance(nodeA, nodeB2), 2);
-
-                return distance1 <= distance2 ? -1 : 1;
-            });
-
-            while(nodeA.connections.length > Wormhole.NODE_MAX_CONNECTIONS) {
-                nodeA.connections.pop();
-            }
-        });
     }
 
     startTimer(name)
@@ -246,22 +244,22 @@ class Wormhole
 
     static lerp(a, b, t, clamp = true, precision = 1)
     {
-        let diff = b - a;
-        let tt = (clamp ? Math.max(0, Math.min(precision, t)) : t) / precision;
+        const diff = b - a;
+        const tt = (clamp ? Math.max(0, Math.min(precision, t)) : t) / precision;
         return a + diff * tt;
     }
 
     static inverseLerp(a, b, t, clamp = true)
     {
-        let diff = b - a;
-        let normalT = clamp ? Math.max(a, Math.min(b, t)) : t;
+        const diff = b - a;
+        const normalT = clamp ? Math.max(a, Math.min(b, t)) : t;
         return (normalT - a) / diff;
     }
 
     static rotateClamp(value, min = 0, max = 1, onClamp = null)
     {
         let result = value;
-        let diff = Math.abs(max - min);
+        const diff = Math.abs(max - min);
         let clamped = false;
 
         while (result < min) {
@@ -283,7 +281,7 @@ class Wormhole
 
     static distanceMultiplier(pointA, pointB, maxDistance, inverse = false)
     {
-        let result = Math.min(maxDistance, Math.abs(pointA - pointB)) / maxDistance;
+        const result = Math.min(maxDistance, Math.abs(pointA - pointB)) / maxDistance;
         return inverse ? 1 - result : result;
     }
 
@@ -355,7 +353,7 @@ class Wormhole
             nodeB.positionZ
         );
 
-        let distanceMultiplier = (nodeA.entity.width + nodeB.entity.width) / 2;
+        const distanceMultiplier = (nodeA.entity.width + nodeB.entity.width) / 2;
         if (distanceMultiplier > 0) {
             distance *= 1 / distanceMultiplier;
         }
@@ -387,19 +385,31 @@ class WormholeEntity
         this.backgroundR = -1;
         this.backgroundG = -1;
         this.backgroundB = -1;
-        this.reset = false;
+
+        this.rectangleWidth = 0;
+        this.rectangleHeight = 0;
 
         this.tick();
     }
 
+    get shockwaveProgressDistance() {
+        const shockwaveMaxDistanceFaded = Wormhole.lerp(Wormhole.SHOCKWAVE_MAX_DISTANCE, 0, Math.sqrt(this.progress));
+        const progressDistance = Wormhole.distanceMultiplier(this.progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
+        return Wormhole.lerp(progressDistance, 0, this.progress * 2);
+    }
+    get scaledRectangleWidth() { return this.rectangleWidth * this.sizeMultiplier; }
+    get scaledRectangleHeight() { return this.rectangleHeight * this.sizeMultiplier; }
+    get scaleRectangleSize() { return Math.min(this.scaledRectangleWidth, this.scaledRectangleHeight); }
+    get spaceX() { return this.wormhole.resolutionX - this.scaledRectangleWidth; }
+    get spaceY() { return this.wormhole.resolutionY - this.scaledRectangleHeight; }
+    get positionX() { return this.wormhole.sourceX * this.spaceX + this.scaledRectangleWidth / 2; }
+    get positionY() { return this.wormhole.sourceY * this.spaceY + this.scaledRectangleHeight / 2; }
+    get backgroundFillStyle() { return `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`; }
+
     tick()
     {
-        this.reset = false;
-
         this.virtualProgress += this.wormhole.entitySpeed * (Wormhole.ENTITY_PRECISION / 1000);
-        this.virtualProgress = Wormhole.rotateClamp(this.virtualProgress, 0, Wormhole.ENTITY_PRECISION, () => {
-            this.reset = true;
-        });
+        this.virtualProgress = Wormhole.rotateClamp(this.virtualProgress, 0, Wormhole.ENTITY_PRECISION);
 
         this.progress = Math.round(this.virtualProgress) / Wormhole.ENTITY_PRECISION;
     }
@@ -409,27 +419,14 @@ class WormholeEntity
         this.width = this.progress * this.progress * 2;
         this.height = this.progress * this.progress * 2;
 
+        this.rectangleWidth = this.width * this.wormhole.resolutionSize * Wormhole.RECTANGLE_WIDTH;
+        this.rectangleHeight = this.height * this.wormhole.resolutionSize * Wormhole.RECTANGLE_HEIGHT;
+
         this.opacity = Wormhole.cutoff(this.progress, 0.5, 0, 0.7, 0);
         this.rotation = Wormhole.cutoff(this.progress, 0.55, -90, 420, 240);
 
         this.sizeMultiplier = Wormhole.lerp(1, Wormhole.SHOCKWAVE_SIZE_MULTIPLIER, this.shockwaveProgressDistance);
     }
-
-    get shockwaveProgressDistance() {
-        let shockwaveMaxDistanceFaded = Wormhole.lerp(Wormhole.SHOCKWAVE_MAX_DISTANCE, 0, Math.sqrt(this.progress));
-        let progressDistance = Wormhole.distanceMultiplier(this.progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
-        return Wormhole.lerp(progressDistance, 0, this.progress * 2);
-    }
-    get rectangleWidth() { return this.width * this.wormhole.resolutionSize * Wormhole.RECTANGLE_WIDTH; }
-    get rectangleHeight() { return this.height * this.wormhole.resolutionSize * Wormhole.RECTANGLE_HEIGHT; }
-    get scaledRectangleWidth() { return this.rectangleWidth * this.sizeMultiplier; }
-    get scaledRectangleHeight() { return this.rectangleHeight * this.sizeMultiplier; }
-    get scaleRectangleSize() { return Math.min(this.scaledRectangleWidth, this.scaledRectangleHeight); }
-    get spaceX() { return this.wormhole.resolutionX - this.scaledRectangleWidth; }
-    get spaceY() { return this.wormhole.resolutionY - this.scaledRectangleHeight; }
-    get positionX() { return this.wormhole.sourceX * this.spaceX + this.scaledRectangleWidth / 2; }
-    get positionY() { return this.wormhole.sourceY * this.spaceY + this.scaledRectangleHeight / 2; }
-    get backgroundFillStyle() { return `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`; }
 
     render()
     {
@@ -486,11 +483,6 @@ class WormholeNode
         this.connections = [];
     }
 
-    hasConnectionWith(nodeB)
-    {
-        return this.connections.filter(node => node.index === nodeB.index).length > 0;
-    }
-
     get angleOffsetX() { return Math.sin(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize; }
     get angleOffsetY() { return Math.cos(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize; }
     get positionX() { return this.entity.positionX + this.angleOffsetX; }
@@ -531,7 +523,7 @@ class WormholeNode
         this.wormhole.canvas.save();
 
         this.connections.forEach(nodeB => {
-            let distance = Wormhole.nodeDistance(this, nodeB);
+            const distance = Wormhole.nodeDistance(this, nodeB);
             const distanceRatio = 1 - Wormhole.inverseLerp(this.wormhole.nodeMinDistance, this.wormhole.nodeMaxDistance, distance);
 
             this.wormhole.canvas.globalAlpha = Math.min(this.opacity, nodeB.opacity) * distanceRatio;
@@ -542,5 +534,10 @@ class WormholeNode
         });
 
         this.wormhole.canvas.restore();
+    }
+
+    hasConnectionWith(nodeB)
+    {
+        return this.connections.filter(node => node.index === nodeB.index).length > 0;
     }
 }
