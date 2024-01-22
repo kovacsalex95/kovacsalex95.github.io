@@ -36,11 +36,22 @@ class Wormhole
         this.entities = [];
         this.nodes = [];
         this.timers = {};
+        this.touchScreen = false;
 
         this.shockWave = 1;
 
         this.canvasElement = document.getElementById('wormhole');
         document.addEventListener('mousemove', (event) => {
+            if (this.touchScreen) {
+                return;
+            }
+
+            this.cursorPositionX = event.x / window.innerWidth;
+            this.cursorPositionY = event.y / window.innerHeight;
+        });
+        document.addEventListener('touchmove', (event) => {
+            this.touchScreen = true;
+            
             this.cursorPositionX = event.x / window.innerWidth;
             this.cursorPositionY = event.y / window.innerHeight;
         });
