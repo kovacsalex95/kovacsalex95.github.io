@@ -134,7 +134,7 @@ class Wormhole
 
         this.renderFrame();
 
-        Object.keys(this.timers).forEach(key => this.timers[key] += elapsed )
+        Object.keys(this.timers).forEach(key => this.timers[key] += elapsed)
         requestAnimationFrame(() => this.update());
     }
 
