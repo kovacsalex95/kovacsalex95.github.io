@@ -2,6 +2,7 @@ window.addEventListener('load', () => new Wormhole());
 
 class Wormhole
 {
+    static get MAXIMUM_RESOLUTION() { return 1440*810; }
     static get TARGET_SCREEN_SIZE() { return 1080; }
     static get ENTITY_PRECISION() { return 5000; }
     static get ENTITY_COUNT() { return 40; }
@@ -62,7 +63,6 @@ class Wormhole
         requestAnimationFrame(() => this.update());
     }
 
-    get maximumResolution() { return 1280*720; }
     get nodeSize() { return 18 * this.screenScale; }
     get nodeZ() { return this.resolutionSize * 0.1; }
     get nodeMinDistance() { return this.resolutionSize * 0.45; }
@@ -77,7 +77,7 @@ class Wormhole
         this.canvasSize = Math.min(this.canvasWidth, this.canvasHeight);
 
         const fullResolution = this.canvasWidth * this.canvasHeight;
-        this.resolutionScale = fullResolution > 0 ? Math.min(1, this.maximumResolution / fullResolution) : 1;
+        this.resolutionScale = fullResolution > 0 ? Math.min(1, Wormhole.MAXIMUM_RESOLUTION / fullResolution) : 1;
         this.screenScale = this.canvasSize / Wormhole.TARGET_SCREEN_SIZE * this.resolutionScale;
 
         this.resolutionX = Math.round(this.canvasWidth * this.resolutionScale);
