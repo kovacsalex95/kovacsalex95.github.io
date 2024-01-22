@@ -51,9 +51,19 @@ class Wormhole
         });
         document.addEventListener('touchmove', (event) => {
             this.touchScreen = true;
-            
-            this.cursorPositionX = event.x / window.innerWidth;
-            this.cursorPositionY = event.y / window.innerHeight;
+
+            let x = 0;
+            let y = 0;
+            const touches = Array.from(event.touches);
+            touches.forEach(touch => {
+                x += touch.screenX;
+                y += touch.screenY;
+            })
+            x /= touches.length;
+            y /= touches.length;
+
+            this.cursorPositionX = x / window.innerWidth;
+            this.cursorPositionY = y / window.innerHeight;
         });
 
         this.canvas = this.canvasElement.getContext("2d", { alpha: false });
