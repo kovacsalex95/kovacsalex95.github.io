@@ -16,9 +16,9 @@ class Wormhole
     static get RECTANGLE_HEIGHT() { return 1.3; }
 
     get nodeSize() { return Math.ceil(18 * this.screenScale); }
-    get nodeZ() { return Math.floor(this.resolutionSize * 0.15); }
-    get nodeMinDistance() { return Math.floor(this.resolutionSize * 0.4); }
-    get nodeMaxDistance() { return Math.floor(this.resolutionSize * 0.55); }
+    get nodeZ() { return Math.trunc(this.resolutionSize * 0.15); }
+    get nodeMinDistance() { return Math.trunc(this.resolutionSize * 0.4); }
+    get nodeMaxDistance() { return Math.trunc(this.resolutionSize * 0.55); }
     get shockwaveSquared() { return this.shockWave * this.shockWave; }
     get entitySpeed() { return Wormhole.ENTITY_SPEED * this.framerateSpeed; }
 
@@ -66,7 +66,17 @@ class Wormhole
             this.cursorPositionY = y / window.innerHeight;
         });
 
-        this.canvas = this.canvasElement.getContext("2d", { alpha: false });
+        this.canvas = null;
+
+        const contextTypes = [/*'webgl2', 'webgl', */'2d'];
+        for (let i = 0; i < contextTypes.length; i++) {
+            this.canvas = this.canvasElement.getContext(contextTypes[i], { alpha: false });
+
+            if (this.canvas !== null) {
+                console.log('canvas context:', contextTypes[i]);
+                break;
+            }
+        }
 
         this.canvasWidth = 0;
         this.canvasHeight = 0;
@@ -358,7 +368,7 @@ class Wormhole
         const dy = y1 - y2;
         const dz = z1 - z2;
 
-        return Math.floor(Math.sqrt( dx * dx + dy * dy + dz * dz ));
+        return Math.trunc(Math.sqrt( dx * dx + dy * dy + dz * dz ));
     }
 
     static nodeDistance(nodeA, nodeB)
@@ -416,13 +426,13 @@ class WormholeEntity
         const progressDistance = Wormhole.distanceMultiplier(this.progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
         return Wormhole.lerp(progressDistance, 0, this.progress * 2);
     }
-    get scaledRectangleWidth() { return Math.floor(this.rectangleWidth * this.sizeMultiplier); }
-    get scaledRectangleHeight() { return Math.floor(this.rectangleHeight * this.sizeMultiplier); }
+    get scaledRectangleWidth() { return Math.trunc(this.rectangleWidth * this.sizeMultiplier); }
+    get scaledRectangleHeight() { return Math.trunc(this.rectangleHeight * this.sizeMultiplier); }
     get scaleRectangleSize() { return Math.min(this.scaledRectangleWidth, this.scaledRectangleHeight); }
     get spaceX() { return this.wormhole.resolutionX - this.scaledRectangleWidth; }
     get spaceY() { return this.wormhole.resolutionY - this.scaledRectangleHeight; }
-    get positionX() { return Math.floor(this.wormhole.sourceX * this.spaceX + this.scaledRectangleWidth / 2); }
-    get positionY() { return Math.floor(this.wormhole.sourceY * this.spaceY + this.scaledRectangleHeight / 2); }
+    get positionX() { return Math.trunc(this.wormhole.sourceX * this.spaceX + this.scaledRectangleWidth / 2); }
+    get positionY() { return Math.trunc(this.wormhole.sourceY * this.spaceY + this.scaledRectangleHeight / 2); }
     get backgroundFillStyle() { return `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`; }
 
     tick()
@@ -438,8 +448,8 @@ class WormholeEntity
         this.width = this.progress * this.progress * 2;
         this.height = this.progress * this.progress * 2;
 
-        this.rectangleWidth = Math.floor(this.width * this.wormhole.resolutionSize * Wormhole.RECTANGLE_WIDTH);
-        this.rectangleHeight = Math.floor(this.height * this.wormhole.resolutionSize * Wormhole.RECTANGLE_HEIGHT);
+        this.rectangleWidth = Math.trunc(this.width * this.wormhole.resolutionSize * Wormhole.RECTANGLE_WIDTH);
+        this.rectangleHeight = Math.trunc(this.height * this.wormhole.resolutionSize * Wormhole.RECTANGLE_HEIGHT);
 
         this.opacity = Wormhole.cutoff(this.progress, 0.5, 0, 0.7, 0);
         this.rotation = Wormhole.cutoff(this.progress, 0.55, -90, 420, 240);
@@ -457,18 +467,18 @@ class WormholeEntity
         if (Math.min(this.rectangleWidth, this.rectangleHeight) > 10) {
             this.wormhole.canvas.globalAlpha = this.opacity;
 
-            this.targetBackgroundR = Math.floor(Wormhole.lerp(10, 210, this.progress)); //, Wormhole.ENTITY_PRECISION));
-            this.targetBackgroundG = Math.floor(Wormhole.lerp(40, 210, this.progress)); //, Wormhole.ENTITY_PRECISION));
-            this.targetBackgroundB = Math.floor(Wormhole.lerp(70, 210, this.progress)); //, Wormhole.ENTITY_PRECISION));
+            this.targetBackgroundR = Wormhole.lerp(10, 210, this.progress); //, Wormhole.ENTITY_PRECISION));
+            this.targetBackgroundG = Wormhole.lerp(40, 210, this.progress); //, Wormhole.ENTITY_PRECISION));
+            this.targetBackgroundB = Wormhole.lerp(70, 210, this.progress); //, Wormhole.ENTITY_PRECISION));
 
             if (this.backgroundR < 0 || this.backgroundG < 0|| this.backgroundB < 0) {
                 this.backgroundR = this.targetBackgroundR;
                 this.backgroundG = this.targetBackgroundG;
                 this.backgroundB = this.targetBackgroundB;
             }
-            this.backgroundR = Math.floor(Wormhole.lerp(this.backgroundR, this.targetBackgroundR, 0.01 * this.wormhole.framerateSpeed));
-            this.backgroundG = Math.floor(Wormhole.lerp(this.backgroundG, this.targetBackgroundG, 0.01 * this.wormhole.framerateSpeed));
-            this.backgroundB = Math.floor(Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.01 * this.wormhole.framerateSpeed));
+            this.backgroundR = Math.ceil(Wormhole.lerp(this.backgroundR, this.targetBackgroundR, 0.05 * this.wormhole.framerateSpeed));
+            this.backgroundG = Math.ceil(Wormhole.lerp(this.backgroundG, this.targetBackgroundG, 0.05 * this.wormhole.framerateSpeed));
+            this.backgroundB = Math.ceil(Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.05 * this.wormhole.framerateSpeed));
 
             this.wormhole.canvas.fillStyle = this.backgroundFillStyle;
 
@@ -502,8 +512,8 @@ class WormholeNode
         this.connections = [];
     }
 
-    get angleOffsetX() { return Math.floor(Math.sin(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize); }
-    get angleOffsetY() { return Math.floor(Math.cos(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize); }
+    get angleOffsetX() { return Math.trunc(Math.sin(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize); }
+    get angleOffsetY() { return Math.trunc(Math.cos(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize); }
     get positionX() { return this.entity.positionX + this.angleOffsetX; }
     get positionY() { return this.entity.positionY + this.angleOffsetY; }
     get positionZ() { return this.entity.width * this.wormhole.nodeZ; }
