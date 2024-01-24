@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <script type="text/javascript" src="assets/js/lx-canvas.js"></script>
+    </head>
+    <body>
+        <div id="canvas-test" style="width: 70%; height: 70%; background: black"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const canvas = new LxCanvas('#canvas-test');
+
+                canvas.addLayer('layer1');
+                const rectangle = canvas.getLayer('layer1').createRectangle(
+                    LxUnit.px(100),
+                    LxUnit.px(100),
+                    LxUnit.px(200),
+                    LxUnit.px(150)
+                );
+                rectangle.css('background', 'red');
+
+                canvas.addLayer('layer2');
+                const rectangle2 = canvas.getLayer('layer2').createRectangle(
+                    LxUnit.px(120),
+                    LxUnit.px(130),
+                    LxUnit.px(220),
+                    LxUnit.px(100),
+                );
+                rectangle2.css('background', 'blue');
+            });
+        </script>
+    </body>
+</html>
