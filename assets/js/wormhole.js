@@ -14,7 +14,7 @@ class Wormhole
     static get SHOCKWAVE_SPEED_MULTIPLIER() { return 20; }
     static get RECTANGLE_WIDTH() { return 2; }
     static get RECTANGLE_HEIGHT() { return 1.3; }
-    static get COLOR_PRECISION() { return 100; }
+    static get COLOR_PRECISION() { return 255 * 2; }
 
     get nodeSize() { return 18 * this.screenScale; }
     get nodeZ() { return Math.trunc(this.resolutionSize * 0.15); }
@@ -94,7 +94,7 @@ class Wormhole
         this.colorRamp = Wormhole.generateColorRamp(
             Wormhole.hexToRgb('#0a2846'),
             Wormhole.hexToRgb('#d2d2d2'),
-            Wormhole.ENTITY_COUNT * Wormhole.COLOR_PRECISION,
+            Wormhole.COLOR_PRECISION,
             (t) => t,
         );
 
@@ -510,7 +510,7 @@ class WormholeEntity
 
         if (Math.min(this.rectangleWidth, this.rectangleHeight) > 10) {
             this.wormhole.canvas.globalAlpha = this.opacity;
-            const colorIndex = Math.round(this.progress * Wormhole.ENTITY_COUNT * Wormhole.COLOR_PRECISION);
+            const colorIndex = Math.round(this.progress * Wormhole.COLOR_PRECISION);
             this.wormhole.canvas.fillStyle = this.wormhole.colorRamp[colorIndex];
 
             this.wormhole.canvas.beginPath();
