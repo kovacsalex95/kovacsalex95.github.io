@@ -14,8 +14,9 @@ class Wormhole
     static get SHOCKWAVE_SPEED_MULTIPLIER() { return 20; }
     static get RECTANGLE_WIDTH() { return 2; }
     static get RECTANGLE_HEIGHT() { return 1.3; }
+    static get COLOR_PRECISION() { return 100; }
 
-    get nodeSize() { return Math.ceil(18 * this.screenScale); }
+    get nodeSize() { return 18 * this.screenScale; }
     get nodeZ() { return Math.trunc(this.resolutionSize * 0.15); }
     get nodeMinDistance() { return Math.trunc(this.resolutionSize * 0.4); }
     get nodeMaxDistance() { return Math.trunc(this.resolutionSize * 0.55); }
@@ -89,6 +90,13 @@ class Wormhole
         this.resolutionSize = 0;
 
         this.screenScale = 1;
+
+        this.colorRamp = Wormhole.generateColorRamp(
+            Wormhole.hexToRgb('#0a2846'),
+            Wormhole.hexToRgb('#d2d2d2'),
+            Wormhole.ENTITY_COUNT * Wormhole.COLOR_PRECISION,
+            (t) => t,
+        );
 
         this.updateResolution();
 
@@ -235,11 +243,12 @@ class Wormhole
         this.shockWave += this.entitySpeed * Wormhole.SHOCKWAVE_SPEED_MULTIPLIER * 0.001;
         this.shockWave = Wormhole.rotateClamp(this.shockWave);
 
+        this.entities.forEach((entity) => entity.tick());
         this.entities.sort((entityA, entityB) => { return entityA.progress > entityB.progress ? -1 : 1; });
         this.entities.forEach((entity) => entity.render());
 
         this.connectNodes();
-        const nodeTick = this.tickTimer('nodeReconnect', 1.5);
+        const nodeTick = this.tickTimer('nodeReconnect', 1);
         this.nodes.forEach((node) => node.render(nodeTick));
     }
 
@@ -405,6 +414,29 @@ class Wormhole
 
         return distance;
     }
+
+    static colorLerp(colorA, colorB, t)
+    {
+        return {
+            r: Wormhole.lerp(colorA.r, colorB.r, t),
+            g: Wormhole.lerp(colorA.g, colorB.g, t),
+            b: Wormhole.lerp(colorA.b, colorB.b, t),
+        }
+    }
+
+    static generateColorRamp(colorA, colorB, steps = 10, timingFunction = (t) => t)
+    {
+        let result = [];
+        const stepT = 1 / steps;
+
+        for (let i = 0; i <= steps; i++) {
+            const t = i * stepT;
+            const color = Wormhole.colorLerp(colorA, colorB, timingFunction(t));
+            result.push(Wormhole.rgbToHex(color.r, color.g, color.b));
+        }
+
+        return result;
+    }
 }
 
 class WormholeEntity
@@ -472,28 +504,14 @@ class WormholeEntity
 
     render()
     {
-        this.tick();
         this.update();
 
         this.wormhole.canvas.save();
 
         if (Math.min(this.rectangleWidth, this.rectangleHeight) > 10) {
             this.wormhole.canvas.globalAlpha = this.opacity;
-
-            this.targetBackgroundR = Wormhole.lerp(10, 210, this.progress); //, Wormhole.ENTITY_PRECISION));
-            this.targetBackgroundG = Wormhole.lerp(40, 210, this.progress); //, Wormhole.ENTITY_PRECISION));
-            this.targetBackgroundB = Wormhole.lerp(70, 210, this.progress); //, Wormhole.ENTITY_PRECISION));
-
-            if (this.backgroundR < 0 || this.backgroundG < 0|| this.backgroundB < 0) {
-                this.backgroundR = this.targetBackgroundR;
-                this.backgroundG = this.targetBackgroundG;
-                this.backgroundB = this.targetBackgroundB;
-            }
-            this.backgroundR = Math.ceil(Wormhole.lerp(this.backgroundR, this.targetBackgroundR, 0.05 * this.wormhole.framerateSpeed));
-            this.backgroundG = Math.ceil(Wormhole.lerp(this.backgroundG, this.targetBackgroundG, 0.05 * this.wormhole.framerateSpeed));
-            this.backgroundB = Math.ceil(Wormhole.lerp(this.backgroundB, this.targetBackgroundB, 0.05 * this.wormhole.framerateSpeed));
-
-            this.wormhole.canvas.fillStyle = this.backgroundFillStyle;
+            const colorIndex = Math.round(this.progress * Wormhole.ENTITY_COUNT * Wormhole.COLOR_PRECISION);
+            this.wormhole.canvas.fillStyle = this.wormhole.colorRamp[colorIndex];
 
             this.wormhole.canvas.beginPath();
             this.wormhole.canvas.ellipse(
@@ -548,7 +566,7 @@ class WormholeNode
         this.wormhole.canvas.arc(
             this.positionX,
             this.positionY,
-            Math.ceil(this.wormhole.nodeSize * this.size * this.entity.width),
+            this.wormhole.nodeSize * this.size * this.entity.width,
             0,
             Wormhole.degreesToRadians(360)
         );
