@@ -2,8 +2,7 @@ window.addEventListener('load', () => new Wormhole());
 
 class Wormhole
 {
-    static get MINIMUM_RESOLUTION() { return 1600*900; }
-    static get MAXIMUM_RESOLUTION() { return 2160*1440; }
+    static get MINIMUM_RESOLUTION() { return 1280*720; }
     static get TARGET_SCREEN_SIZE() { return 1080; }
     static get ENTITY_PRECISION() { return 5000; }
     static get ENTITY_COUNT() { return 40; }
@@ -138,7 +137,7 @@ class Wormhole
         this.framerateSpeed = this.frameTime / targetFrametime;
         this.lastFrame = Date.now();
 
-        if (Math.abs(this.framerateSpeed - 1) > 0.1 && this.tickTimer('framerateSmoothing', 1)) {
+        if (Math.abs(this.framerateSpeed - 1) > 0.1 && this.tickTimer('framerateSmoothing', 0.5)) {
             this.updateResolution(true);
         }
 
@@ -162,12 +161,11 @@ class Wormhole
         this.resolutionScale = 1;
 
         if (autoFramerate) {
-            const currentResolution = this.resolutionX * this.resolutionY;
+            const canvasResolution = this.canvasWidth * this.canvasHeight;
+            const minimumResolution = Math.min(canvasResolution, Wormhole.MINIMUM_RESOLUTION);
             const performanceIndex = this.framerateSpeed > 0 ? 1 / this.framerateSpeed : 0;
 
-            const targetResolution = currentResolution * performanceIndex;
-            const scaleFactor = Wormhole.inverseLerp(Wormhole.MINIMUM_RESOLUTION, Wormhole.MAXIMUM_RESOLUTION, targetResolution);
-            this.resolutionScale = Wormhole.lerp((Wormhole.MINIMUM_RESOLUTION / Wormhole.MAXIMUM_RESOLUTION), 1, scaleFactor);
+            this.resolutionScale = Wormhole.lerp((minimumResolution / canvasResolution), 1, performanceIndex);
         }
 
         this.screenScale = this.canvasSize / Wormhole.TARGET_SCREEN_SIZE * this.resolutionScale;
@@ -241,7 +239,7 @@ class Wormhole
         this.entities.forEach((entity) => entity.render());
 
         this.connectNodes();
-        const nodeTick = this.tickTimer('nodeReconnect', 0.5);
+        const nodeTick = this.tickTimer('nodeReconnect', 1.5);
         this.nodes.forEach((node) => node.render(nodeTick));
     }
 
