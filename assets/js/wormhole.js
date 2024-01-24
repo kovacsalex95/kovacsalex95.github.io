@@ -441,8 +441,8 @@ class WormholeEntity
         const progressDistance = Wormhole.distanceMultiplier(this.progress, this.wormhole.shockwaveSquared, shockwaveMaxDistanceFaded, true);
         return Wormhole.lerp(progressDistance, 0, this.progress * 2);
     }
-    get scaledRectangleWidth() { return Math.trunc(this.rectangleWidth * this.sizeMultiplier); }
-    get scaledRectangleHeight() { return Math.trunc(this.rectangleHeight * this.sizeMultiplier); }
+    get scaledRectangleWidth() { return this.rectangleWidth * this.sizeMultiplier; }
+    get scaledRectangleHeight() { return this.rectangleHeight * this.sizeMultiplier; }
     get scaleRectangleSize() { return Math.min(this.scaledRectangleWidth, this.scaledRectangleHeight); }
     get spaceX() { return this.wormhole.resolutionX - this.scaledRectangleWidth; }
     get spaceY() { return this.wormhole.resolutionY - this.scaledRectangleHeight; }
@@ -527,8 +527,8 @@ class WormholeNode
         this.connections = [];
     }
 
-    get angleOffsetX() { return Math.trunc(Math.sin(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize); }
-    get angleOffsetY() { return Math.trunc(Math.cos(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize); }
+    get angleOffsetX() { return Math.sin(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize; }
+    get angleOffsetY() { return Math.cos(Wormhole.degreesToRadians(this.angle - this.entity.rotation)) * this.distance * this.entity.scaleRectangleSize; }
     get positionX() { return this.entity.positionX + this.angleOffsetX; }
     get positionY() { return this.entity.positionY + this.angleOffsetY; }
     get positionZ() { return this.entity.width * this.wormhole.nodeZ; }
