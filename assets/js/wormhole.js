@@ -453,13 +453,6 @@ class WormholeEntity
         this.rotation = 0;
         this.sizeMultiplier = 1;
 
-        this.targetBackgroundR = 0;
-        this.targetBackgroundG = 0;
-        this.targetBackgroundB = 0;
-        this.backgroundR = -1;
-        this.backgroundG = -1;
-        this.backgroundB = -1;
-
         this.rectangleWidth = 0;
         this.rectangleHeight = 0;
 
@@ -478,7 +471,6 @@ class WormholeEntity
     get spaceY() { return this.wormhole.resolutionY - this.scaledRectangleHeight; }
     get positionX() { return Math.trunc(this.wormhole.sourceX * this.spaceX + this.scaledRectangleWidth / 2); }
     get positionY() { return Math.trunc(this.wormhole.sourceY * this.spaceY + this.scaledRectangleHeight / 2); }
-    get backgroundFillStyle() { return `rgb(${this.targetBackgroundR}, ${this.backgroundG}, ${this.backgroundB})`; }
 
     tick()
     {
