@@ -3,7 +3,7 @@ window.addEventListener('load', () => new Wormhole());
 class Wormhole
 {
     static get MINIMUM_RESOLUTION() { return 1600*900; }
-    static get MAXIMUM_RESOLUTION() { return 1920*1080; }
+    static get MAXIMUM_RESOLUTION() { return 2160*1440; }
     static get TARGET_SCREEN_SIZE() { return 1080; }
     static get ENTITY_PRECISION() { return 5000; }
     static get ENTITY_COUNT() { return 40; }
