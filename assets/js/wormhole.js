@@ -2,6 +2,7 @@ window.addEventListener('load', () => new Wormhole());
 
 class Wormhole
 {
+    static get MINIMUM_RESOLUTION() { return 1600*900; }
     static get MAXIMUM_RESOLUTION() { return 1920*1080; }
     static get TARGET_SCREEN_SIZE() { return 1080; }
     static get ENTITY_PRECISION() { return 5000; }
@@ -25,6 +26,7 @@ class Wormhole
     constructor()
     {
         this.lastFrame = Date.now();
+        this.frameTime = 1000 / 60;
         this.framerateSpeed = 1;
 
         this.cursorPositionX = 0.5;
@@ -131,10 +133,14 @@ class Wormhole
 
     update()
     {
-        const elapsed = Date.now() - this.lastFrame; // 20ms
+        this.frameTime = Date.now() - this.lastFrame; // 20ms
         const targetFrametime = 1000 / 60; // 40ms
-        this.framerateSpeed = elapsed / targetFrametime;
+        this.framerateSpeed = this.frameTime / targetFrametime;
         this.lastFrame = Date.now();
+
+        if (Math.abs(this.framerateSpeed - 1) > 0.1 && this.tickTimer('framerateSmoothing', 1)) {
+            this.updateResolution(true);
+        }
 
         this.targetSourceX = Wormhole.lerp(0.3, 0.7, 1 - this.cursorPositionX);
         this.targetSourceY = Wormhole.lerp(0.3, 0.7, 1 - this.cursorPositionY);
@@ -144,18 +150,26 @@ class Wormhole
 
         this.renderFrame();
 
-        Object.keys(this.timers).forEach(key => this.timers[key] += elapsed)
+        Object.keys(this.timers).forEach(key => this.timers[key] += this.frameTime)
         requestAnimationFrame(() => this.update());
     }
 
-    updateResolution()
+    updateResolution(autoFramerate = false)
     {
         this.canvasWidth = this.canvasElement.parentElement.clientWidth;
         this.canvasHeight = this.canvasElement.parentElement.clientHeight;
         this.canvasSize = Math.min(this.canvasWidth, this.canvasHeight);
+        this.resolutionScale = 1;
 
-        const fullResolution = this.canvasWidth * this.canvasHeight;
-        this.resolutionScale = fullResolution > 0 ? Math.min(1, Wormhole.MAXIMUM_RESOLUTION / fullResolution) : 1;
+        if (autoFramerate) {
+            const currentResolution = this.resolutionX * this.resolutionY;
+            const performanceIndex = this.framerateSpeed > 0 ? 1 / this.framerateSpeed : 0;
+
+            const targetResolution = currentResolution * performanceIndex;
+            const scaleFactor = Wormhole.inverseLerp(Wormhole.MINIMUM_RESOLUTION, Wormhole.MAXIMUM_RESOLUTION, targetResolution);
+            this.resolutionScale = Wormhole.lerp((Wormhole.MINIMUM_RESOLUTION / Wormhole.MAXIMUM_RESOLUTION), 1, scaleFactor);
+        }
+
         this.screenScale = this.canvasSize / Wormhole.TARGET_SCREEN_SIZE * this.resolutionScale;
 
         this.resolutionX = Math.round(this.canvasWidth * this.resolutionScale);
@@ -282,7 +296,8 @@ class Wormhole
     {
         const diff = b - a;
         const normalT = clamp ? Math.max(a, Math.min(b, t)) : t;
-        return (normalT - a) / diff;
+        const normalTA = clamp ? Math.max(0, normalT - a) : normalT - a;
+        return normalTA / diff;
     }
 
     static rotateClamp(value, min = 0, max = 1, onClamp = null)
