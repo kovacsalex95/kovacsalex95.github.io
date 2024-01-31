@@ -1,0 +1,48 @@
+@keyframes entity-movement {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        background: black;
+        opacity: var(--opacity);
+    }
+
+    90% {
+        opacity: var(--opacity);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) scale(2) rotate(190deg);
+        background: gray;
+        opacity: 0;
+    }
+}
+
+#wormhole {
+    display: flex;
+    overflow: hidden;
+}
+
+#wormhole > #ellipses {
+    --duration: 5s;
+    --progress: 0;
+    --opacity: 0.1;
+    --delay: 0s;
+    flex-grow: 1;
+    position: relative;
+}
+
+#wormhole > #ellipses > .entity {
+    transition: none !important;
+    width: 1000px;
+    height: 500px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    border-radius: 50%;
+    animation-name: entity-movement;
+    animation-duration: var(--duration);
+    animation-timing-function: linear;
+    animation-delay: var(--delay);
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+    will-change: transform, opacity;
+}

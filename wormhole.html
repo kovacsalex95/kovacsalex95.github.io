@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Wormhole</title>
-        <link rel="stylesheet" href="assets/css/variables.css">
-        <link rel="stylesheet" href="assets/css/main.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script type="text/javascript" src="assets/js/wormhole.js"></script>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <title>Wormhole</title>
+    <link rel="stylesheet" href="assets/css/variables.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/wormhole.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="text/javascript" src="assets/js/wormhole.js"></script>
+</head>
 
-    <body>
-        <header id="main-header" class="relative">
-            <canvas id="wormhole"></canvas>
-            <div id="content" class="ar-container">
-                <nav class="main">
-                    <a>Fooldal</a>
-                    <a>Rolam</a>
-                    <a>Ismeretek</a>
-                    <a>Munkaim</a>
-                    <a>Kapcsolat</a>
-                </nav>
-                <div id="introduction">
-                    <label id="name">Alex Kovács</label>
-                    <label id="slogan">Full-Stack developer</label>
-                </div>
+<body>
+<header id="main-header" class="page">
+    <div class="content">
+        <div id="wormhole" class="absolute-content">
+            <div id="ellipses" data-duration="15" data-entities="20"></div>
+        </div>
+
+        <div id="content" class="absolute-container">
+            <nav class="main">
+                <a>Fooldal</a>
+                <a>Rolam</a>
+                <a>Ismeretek</a>
+                <a>Munkaim</a>
+                <a>Kapcsolat</a>
+            </nav>
+
+            <div id="introduction">
+                <label id="name">Alex Kovács</label>
+                <label id="slogan">Full-Stack developer</label>
             </div>
-        </header>
-    </body>
+        </div>
+    </div>
+</header>
+</body>
 </html>

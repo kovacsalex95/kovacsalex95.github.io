@@ -4,55 +4,6 @@
 /*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
 button,hr,input{overflow:visible}progress,sub,sup{vertical-align:baseline}[type=checkbox],[type=radio],legend{box-sizing:border-box;padding:0}html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}details,main{display:block}h1{font-size:2em;margin:.67em 0}hr{box-sizing:content-box;height:0}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}a{background-color:transparent}abbr[title]{border-bottom:none;text-decoration:underline;text-decoration:underline dotted}b,strong{font-weight:bolder}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}img{border-style:none}button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0}button,select{text-transform:none}[type=button],[type=reset],[type=submit],button{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:ButtonText dotted 1px}fieldset{padding:.35em .75em .625em}legend{color:inherit;display:table;max-width:100%;white-space:normal}textarea{overflow:auto}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}[hidden],template{display:none}
 
-@keyframes name-animation {
-    0% {
-        opacity: 0;
-        filter: blur(10px);
-        transform: translateX(-150%);
-    }
-    50% {
-        opacity: 0;
-        filter: blur(10px);
-        transform: translateX(-150%);
-    }
-    100% {
-        opacity: 1;
-        filter: none;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slogan-animation {
-    0% {
-        opacity: 0;
-        filter: blur(10px);
-        transform: translateX(-150%);
-    }
-    75% {
-        opacity: 0;
-        filter: blur(10px);
-        transform: translateX(-150%);
-    }
-    100% {
-        opacity: 1;
-        filter: none;
-        transform: translateX(0);
-    }
-}
-
-@keyframes menu-animation {
-    0% {
-        opacity: 0;
-        filter: blur(10px);
-        transform: translateY(-150%);
-    }
-    100% {
-        opacity: 1;
-        filter: none;
-        transform: translateY(0);
-    }
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -63,17 +14,22 @@ button,hr,input{overflow:visible}progress,sub,sup{vertical-align:baseline}[type=
 
 body {
     background: #C6DAE4;
-    min-width: 100vw;
     min-height: 100vh;
 }
 
-header#main-header {
+.page {
     width: 100%;
     height: 100vh;
-    overflow: hidden;
+    height: 100dvh;
+    display: flex;
 }
 
-header#main-header > #content {
+.page > .content {
+    flex-grow: 1;
+    position: relative;
+}
+
+header#main-header #content {
     padding-top: var(--gap-4);
     display: flex;
     flex-direction: column;
@@ -81,7 +37,7 @@ header#main-header > #content {
     padding-bottom: var(--gap-5);
 }
 
-header#main-header > #content > nav.main {
+header#main-header #content > nav.main {
     width: fit-content;
     padding: 0 var(--gap-2);
     margin-left: auto;
@@ -96,7 +52,7 @@ header#main-header > #content > nav.main {
     animation-timing-function: cubic-bezier(.39,.58,.57,1);
 }
 
-header#main-header > #content > nav.main > a {
+header#main-header #content > nav.main > a {
     color: #314555;
     background: transparent;
     font-weight: 400;
@@ -107,7 +63,7 @@ header#main-header > #content > nav.main > a {
     transition: all ease 0.1s;
 }
 
-header#main-header > #content > nav.main > a:before {
+header#main-header #content > nav.main > a:before {
     content: ' ';
     position: absolute;
     bottom: 0;
@@ -120,17 +76,17 @@ header#main-header > #content > nav.main > a:before {
     transition: all ease 0.3s;
 }
 
-header#main-header > #content > nav.main > a:hover:before {
+header#main-header #content > nav.main > a:hover:before {
     width: 100%;
     opacity: 1;
 }
 
-header#main-header > #content > nav.main > a:active {
+header#main-header #content > nav.main > a:active {
     color: #eee;
     background: #314555;
 }
 
-header#main-header > #content #name {
+header#main-header #content #name {
     color: #314555;
     display: block;
     width: fit-content;
@@ -141,16 +97,10 @@ header#main-header > #content #name {
     font-family: "Barlow Semi Condensed", sans-serif;
 }
 
-header#main-header > #content #slogan {
+header#main-header #content #slogan {
     color: #314555;
     display: block;
     width: fit-content;
     animation-name: slogan-animation;
     animation-duration: 2.5s;
-}
-
-canvas#wormhole {
-    width: 100%;
-    height: 100%;
-    z-index: 1;
 }
